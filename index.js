@@ -52,6 +52,17 @@ function expectArg(args) {
     return `The first argument to this command must be one of the following: ${args.split(' ').join(', ')}`;
 }
 
+async function apiPost(path, body) {
+    return await (await fetch(`https://api.plugify.cf/v2/${path}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': token
+        },
+        body: JSON.stringify(body)
+    })).json();
+}
+
 if (process.argv[2] == "auth") {
     fs.writeFileSync("token", process.argv[3], { encoding: "utf-8" });
     
@@ -111,24 +122,14 @@ ws.onmessage = async (event) => {
                                 break;
                             case 'create':
                                 if (!line[2]) return console.log('Please specify a channel name.');
-                                if (!line[3]) return console.log('Please specify a guild ID.');
-                                fetch('https://api.plugify.cf/v2/channels/create', {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/json',
-                                        'Authorization': token
-                                    },
-                                    body: JSON.stringify({
-                                        'name': line[2],
-                                        'groupID': line[3],
-                                        'type': 'text'
-                                    })
-                                }).then(function(response) {
-                                    return response.json();
-                                }).then(function(data) {
-                                    if (data.success) return console.log(data.data);
-                                    console.log(`Error: ${data.error}`);
+                                if (!line[3]) return console.log('Please specify a group ID.');
+                                const apiData = await apiPost('channels/create', {
+                                    'name': line[2],
+                                    'groupID': line[3],
+                                    'type': 'text'
                                 });
+                                if (apiData.success) return console.log(apiData.data);
+                                console.log(`Error: ${apiData.error}`);
                                 break;
                             default:
                                 console.log(expectArg('join create'));
@@ -143,39 +144,15 @@ ws.onmessage = async (event) => {
                         switch (line[1]) {
                             case 'info':
                                 if (!line[2]) return console.log('Please specify a group ID.');
-                                fetch('https://api.plugify.cf/v2/groups/info', {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/json',
-                                        'Authorization': token
-                                    },
-                                    body: JSON.stringify({
-                                        'id': line[2]
-                                    })
-                                }).then(function(response) {
-                                    return response.json();
-                                }).then(function(data) {
-                                    if (data.success) return console.log(data.data);
-                                    console.log(`Error: ${data.error}`);
-                                });
+                                const apiData = await apiPost('groups/info', { 'id': line[2] });
+                                if (apiData.success) return console.log(apiData.data);
+                                console.log(`Error: ${apiData.error}`);
                                 break;
                             case 'create':
                                 if (!line[2]) return console.log('Please specify a name.');
-                                fetch('https://api.plugify.cf/v2/groups/create', {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/json',
-                                        'Authorization': token
-                                    },
-                                    body: JSON.stringify({
-                                        'name': line.slice(2).join(' ')
-                                    })
-                                }).then(function(response) {
-                                    return response.json();
-                                }).then(function(data) {
-                                    if (data.success) return console.log(data.data);
-                                    console.log(`Error: ${data.error}`);
-                                });
+                            const apiDataC = await apiPost('groups/create', { 'name': line.slice(2).join(' ') });
+                                if (apiDataC.success) return console.log(apiDataC.data);
+                                console.log(`Error: ${apiDataC.error}`);
                                 break;
                             default:
                                 console.log(expectArg('info create'));
@@ -185,7 +162,7 @@ ws.onmessage = async (event) => {
                     case '.invite':
                         switch (line[1]) {
                             case 'help':
-                                console.log('Subcommands: help, info, create, use\n\nhelp\n====\nDisplays help for this command.\n\ninfo [invite id]\n====\nGets info about a particular invite.\n\ncreate [guild id] [uses (integer)] [expires (unix timestamp)]\n====\nCreates an invite for the specified guild. Enter any non-positive number for unlimited uses. Enter 0 for no expiry.\n\nuse [invite id]\n====\nUses the given invite code.');
+                                console.log('Subcommands: help, info, create, use\n\nhelp\n====\nDisplays help for this command.\n\ninfo [invite id]\n====\nGets info about a particular invite.\n\ncreate [group id] [uses (integer)] [expires (unix timestamp)]\n====\nCreates an invite for the specified group. Enter any non-positive number for unlimited uses. Enter 0 for no expiry.\n\nuse [invite id]\n====\nUses the given invite code.');
                                 break;
                             case 'info':
                                 if (!line[2]) return console.log('Please specify an invite ID.');
@@ -199,73 +176,53 @@ ws.onmessage = async (event) => {
                                     })
                                 }).then(function(response) {
                                     return response.json();
-                                }).then(function(data) {
-                                    if (data.success) return console.log(data.data);
-                                    switch (data.error) {
+                                }).then(function(apiData) {
+                                    if (apiData.success) return console.log(apiData.data);
+                                    switch (apiData.error) {
                                         case 9:
-                                            console.log('Guild doesn\'t exist');
+                                            console.log('Group doesn\'t exist');
                                             break;
                                         case 13:
                                             console.log('Invite doesn\'t exist');
                                             break;
                                         default:
-                                            console.log(`Error: ${data.error}`);
+                                            console.log(`Error: ${apiData.error}`);
                                     }
                                 });
                                 break;
                             case 'create':
-                                if (!line[2]) return console.log('Please specify a guild ID.');
-                                fetch('https://api.plugify.cf/v2/invites/create', {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/json',
-                                        'Authorization': token
-                                    },
-                                    body: JSON.stringify({
-                                        'id': line[2],
-                                        'uses': parseInt(line[3]) < 1 ? null : parseInt(line[3]),
-                                        'expires': line[4] === '0' ? null : new Date(parseInt(line[4])*1000)
-                                    })
-                                }).then(function(response) {
-                                    return response.json();
-                                }).then(function(data) {
-                                    if (data.success) return console.log(data.data);
-                                    switch (data.error) {
-                                        case 9:
-                                            console.log('Guild doesn\'t exist or you aren\'t in it');
-                                            break;
-                                        default:
-                                            console.log(`Error: ${data.error}`);
-                                    }
-                                });
+                                if (!line[2]) return console.log('Please specify a group ID.');
+                                let body = {
+                                    'id': line[2],
+                                    'uses': parseInt(line[3]) < 1 ? null : parseInt(line[3]),
+                                    'expires': line[4] === '0' ? null : new Date(parseInt(line[4])*1000)
+                                };
+                                const apiData = await apiPost('invites/create', body);
+                                console.log(`Creating invite with following data: ${JSON.stringify(body)}`)
+                                if (apiData.success) return console.log(apiData.data);
+                                switch (apiData.error) {
+                                    case 9:
+                                        console.log('Group doesn\'t exist or you aren\'t in it');
+                                        break;
+                                    default:
+                                        console.log(`Error: ${apiData.error}`);
+                                }
                                 break;
                             case 'use':
                             case 'accept':
                                 if (!line[2]) return console.log('Please specify an invite ID.');
-                                fetch('https://api.plugify.cf/v2/invites/use', {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/json',
-                                        'Authorization': token
-                                    },
-                                    body: JSON.stringify({
-                                        'id': line[2]
-                                    })
-                                }).then(function(response) {
-                                    return response.json();
-                                }).then(function(data) {
-                                    if (data.success) return console.log(data.data);
-                                    switch (data.error) {
-                                        case 9:
-                                            console.log('Guild doesn\'t exist');
-                                            break;
-                                        case 13:
-                                            console.log('Invite doesn\'t exist');
-                                            break;
-                                        default:
-                                            console.log(`Error: ${data.error}`);
-                                    }
-                                });
+                                const apiDataU = await apiPost('invites/use', { 'id': line[2] });
+                                if (apiDataU.success) return console.log(apiDataU.data);
+                                switch (apiDataU.error) {
+                                    case 9:
+                                        console.log('Group doesn\'t exist');
+                                        break;
+                                    case 13:
+                                        console.log('Invite doesn\'t exist');
+                                        break;
+                                    default:
+                                        console.log(`Error: ${apiDataU.error}`);
+                                }
                                 break;
                             default:
                                 console.log(expectArg('help info create use accept'));
@@ -275,15 +232,15 @@ ws.onmessage = async (event) => {
                     case ".ui":
                     case ".userinfo":
                         let username = line[1];
-                        if (!username) username = user.displayName;
-                        const data = await (await fetch(`https://api.plugify.cf/v2/users/info/${username.replace(/@/g, '')}`)).json();
-                        if (data.success) return console.log(data.data);
-                        switch (data.error) {
+                        if (!username) username = user.username;
+                        const apiData = await (await fetch(`https://api.plugify.cf/v2/users/info/${username.replace(/@/g, '')}`)).json();
+                        if (apiData.success) return console.log(apiData.data);
+                        switch (apiData.error) {
                             case 8:
                                 console.log('User doesn\'t exist');
                                 break;
                             default:
-                                console.log(`Error: ${data.error}`);
+                                console.log(`Error: ${apiData.error}`);
                         }
                         break;
 
@@ -308,21 +265,16 @@ ws.onmessage = async (event) => {
             });
             break;
 
+        case 3:
+            console.log('Your account has not been verified yet. Please check your email and verify your account first.');
+            process.exit();
+
         case 5:
             channel = data.data.channel;
             rl.setPrompt(`${user.displayName}, #${channel.name}> `);
             if (channel.groupId) {
                 if (!group.id || group.id !== channel.groupId) {
-                    const groupData = await (await fetch('https://api.plugify.cf/v2/groups/info', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': token
-                        },
-                        body: JSON.stringify({
-                            'id': channel.groupId
-                        })
-                    })).json();
+                    const groupData = await apiPost('groups/info', { 'id': channel.groupId });
                     if (!groupData.success) return console.log(`WS | Joined #${data.data.channel.name} in unknown group`);
                     group = groupData.data;
                 }
