@@ -1,3 +1,4 @@
+if (!process.argv[2]) return console.log('Please follow the instructions in the invitation.');
 const fetch = require('node-fetch').default;
 fetch('https://api.plugify.cf/v2/users/register', {
     method: 'POST',
