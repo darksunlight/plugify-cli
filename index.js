@@ -312,6 +312,7 @@ ws.onmessage = async (event) => {
         case 5:
             channel = data.data.channel;
             rl.setPrompt(`${user.displayName}, #${channel.name}> `);
+            if (data.data.history) data.data.history.forEach(message => handleMessage(message));
             if (channel.groupId) {
                 if (!group.id || group.id !== channel.groupId) {
                     const groupData = await apiPost('groups/info', { 'id': channel.groupId });
@@ -331,19 +332,19 @@ ws.onmessage = async (event) => {
             break;
 
         case 10:
-            const author = data.data.author;
-            users[author.username] = author;
-            const time = new Date(data.data.timestamp);
-            const timeString = `${time.getHours() < 10 ? '0' : ''}${time.getHours()}:${time.getMinutes() < 10 ? '0' : ''}${time.getMinutes()}`;
-            let content = data.data.content;
-            content = content.replace(/<@([a-z0-9_-]+)>/gi, '\x1b[47m\x1b[30m@$1\x1b[0m');
-            console.log(`${timeString} [${author.displayName} (@${author.username})]: ${content}\x1b[0m`);
+            handleMessage(data.data);
             break;
 
         case 12:
             console.log(data.data);
             break;
-    
+        
+        case 16:
+            const triggeredTime = new Date(data.data.triggeredAt);
+            const triggeredTimeString = `${triggeredTime.getHours() < 10 ? '0' : ''}${triggeredTime.getHours()}:${triggeredTime.getMinutes() < 10 ? '0' : ''}${triggeredTime.getMinutes()}`;
+            console.log(`${triggeredTimeString} [Plugify (@system)]: ${data.data.content}`);
+            break;
+        
         case 9001:
             isDead = false;
             break;
@@ -352,4 +353,21 @@ ws.onmessage = async (event) => {
             console.log(`WS >>`, data);
             break;
     }
+}
+
+function handleMessage(data) {
+    const author = data.author;
+    users[author.username] = author;
+    const time = new Date(data.timestamp);
+    const timeString = `${time.getHours() < 10 ? '0' : ''}${time.getHours()}:${time.getMinutes() < 10 ? '0' : ''}${time.getMinutes()}`;
+    let content = data.content;
+    let output = '';
+    if (content.match(new RegExp(`<@${user.username}>`))) {
+        output = '\x1b[47m\x1b[30m';
+        content = content.replace(/<@([a-z0-9_-]+)>/gi, '@$1');
+    } else {
+        content = content.replace(/<@([a-z0-9_-]+)>/gi, '\x1b[47m\x1b[30m@$1\x1b[0m');
+    }
+    output += `${timeString} [${author.displayName} (@${author.username})]: ${content}\x1b[0m`;
+    console.log(output);
 }
