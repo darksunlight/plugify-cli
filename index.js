@@ -73,7 +73,7 @@ if (process.argv[2] == "auth") {
 
 const token = fs.readFileSync("token", { encoding: "utf-8" });
 
-const ws = new Websocket(process.argv[2]);
+const ws = new Websocket("wss://api.plugify.cf/");
 
 ws.onopen = () => {
     console.log("WS | Opened.");
@@ -172,7 +172,7 @@ ws.onmessage = async (event) => {
                                 break;
                             case 'create':
                                 if (!line[2]) return console.log('Please specify a name.');
-                            const apiDataC = await apiPost('groups/create', { 'name': line.slice(2).join(' ') });
+                                const apiDataC = await apiPost('groups/create', { 'name': line.slice(2).join(' ') });
                                 if (apiDataC.success) return console.log(apiDataC.data);
                                 console.log(`Error: ${apiDataC.error}`);
                                 break;
