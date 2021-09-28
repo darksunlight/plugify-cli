@@ -28,7 +28,7 @@ let rl = readline.createInterface({
 fixStdoutFor(rl);
 
 function completer(line) {
-    const completions = ".exit .quit .q .join .groups .group .invite .channels .channel .userinfo .ui".split(" ");
+    const completions = ".exit .quit .join .groups .group .invite .channels .channel .userinfo".split(" ");
     const hits = completions.filter((c) => c.startsWith(line));
     // Show all completions if none found
     return [hits.length ? hits : completions, line];
@@ -53,6 +53,16 @@ function expectArg(args) {
     return `The first argument to this command must be one of the following: ${args.split(' ').join(', ')}`;
 }
 
+async function apiGet(path) {
+    return await (await fetch(`https://api.plugify.cf/v2/${path}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': token
+        }
+    })).json();
+}
+
 async function apiPost(path, body) {
     return await (await fetch(`https://api.plugify.cf/v2/${path}`, {
         method: 'POST',
@@ -71,7 +81,12 @@ if (process.argv[2] == "auth") {
     return process.exit(0);
 }
 
-const token = fs.readFileSync("token", { encoding: "utf-8" });
+let token = '';
+try {
+    token = fs.readFileSync("token", { encoding: "utf-8" });
+} catch (_) {
+    token = process.env.token;
+}
 
 const ws = new Websocket("wss://api.plugify.cf/");
 
@@ -98,7 +113,7 @@ ws.onmessage = async (event) => {
             loggedIn = true;
             user = data.data;
             console.log("\n\n\n\n\nWS | Logged in.");
-            rl.setPrompt(`${user.displayName}, #${channel.name}> `);
+            rl.setPrompt(`${user.displayName ?? user.username}, #${channel.name}> `);
             rl.prompt();
 
             rl.on("line", async (input) => {
@@ -123,7 +138,7 @@ ws.onmessage = async (event) => {
                             if (group.id) currentGroup = group.id;
                             else return console.log('Please specify a group ID or join a channel first.');
                         }
-                        const apiDataG = await apiPost('groups/info', { 'id': currentGroup });
+                        const apiDataG = await apiGet(`groups/info/${currentGroup}`);
                         if (apiDataG.success && apiDataG.data.channels) return console.log(apiDataG.data.channels);
                         if (!apiDataG.success) {
                             switch (apiDataG.error) {
@@ -166,7 +181,7 @@ ws.onmessage = async (event) => {
                         switch (line[1]) {
                             case 'info':
                                 if (!line[2]) return console.log('Please specify a group ID.');
-                                const apiData = await apiPost('groups/info', { 'id': line[2] });
+                                const apiData = await apiGet(`groups/info/${line[2]}`);
                                 if (apiData.success) return console.log(apiData.data);
                                 console.log(`Error: ${apiData.error}`);
                                 break;
@@ -188,14 +203,11 @@ ws.onmessage = async (event) => {
                                 break;
                             case 'info':
                                 if (!line[2]) return console.log('Please specify an invite ID.');
-                                fetch('https://api.plugify.cf/v2/invites/info', {
-                                    method: 'POST',
+                                fetch(`https://api.plugify.cf/v2/invites/info/${line[2]}`, {
+                                    method: 'GET',
                                     headers: {
                                         'Content-Type': 'application/json',
-                                    },
-                                    body: JSON.stringify({
-                                        'id': line[2]
-                                    })
+                                    }
                                 }).then(function(response) {
                                     return response.json();
                                 }).then(function(apiData) {
@@ -269,7 +281,7 @@ ws.onmessage = async (event) => {
                                 early: ' \x1b[45mEARLY\x1b[0m',
                                 closedBeta: ' \x1b[43mBETA\x1b[0m'
                             }
-                            return console.log(`${apiData.data.displayName} (@${apiData.data.name})${flags.pro ? labels.pro : ''}${flags.dev ? labels.dev : ''}${flags.early ? labels.early : ''}${flags.closedBeta ? labels.closedBeta : ''}\nAvatar URL: ${apiData.data.avatarURL}`);
+                            return console.log(`${apiData.data.displayName ?? apiData.data.name} (@${apiData.data.name})${flags.pro ? labels.pro : ''}${flags.dev ? labels.dev : ''}${flags.early ? labels.early : ''}${flags.closedBeta ? labels.closedBeta : ''}\nAvatar URL: ${apiData.data.avatarURL}`);
                         }
                         switch (apiData.error) {
                             case 8:
@@ -311,11 +323,11 @@ ws.onmessage = async (event) => {
 
         case 5:
             channel = data.data.channel;
-            rl.setPrompt(`${user.displayName}, #${channel.name}> `);
+            rl.setPrompt(`${user.displayName ?? user.username}, #${channel.name}> `);
             if (data.data.history) data.data.history.forEach(message => handleMessage(message));
             if (channel.groupId) {
                 if (!group.id || group.id !== channel.groupId) {
-                    const groupData = await apiPost('groups/info', { 'id': channel.groupId });
+                    const groupData = await apiGet(`groups/info/${channel.groupId}`);
                     if (!groupData.success) return console.log(`WS | Joined #${data.data.channel.name} in unknown group`);
                     group = groupData.data;
                 }
