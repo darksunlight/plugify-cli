@@ -274,14 +274,16 @@ ws.onmessage = async (event) => {
                                 dev: (apiData.data.flags & 1 << 1) === 1 << 1,
                                 early: (apiData.data.flags & 1 << 2) === 1 << 2,
                                 closedBeta: (apiData.data.flags & 1 << 3) === 1 << 3,
+                                system: (apiData.data.flags & 1 << 4) === 1 << 4,
                             };
                             const labels = {
                                 pro: ' \x1b[42mPRO\x1b[0m',
                                 dev: ' \x1b[44mDEV\x1b[0m',
                                 early: ' \x1b[45mEARLY\x1b[0m',
-                                closedBeta: ' \x1b[43mBETA\x1b[0m'
+                                closedBeta: ' \x1b[43mBETA\x1b[0m',
+                                system: ' \x1b[44mSYSTEM\x1b[0m',
                             }
-                            return console.log(`${apiData.data.displayName ?? apiData.data.name} (@${apiData.data.name})${flags.pro ? labels.pro : ''}${flags.dev ? labels.dev : ''}${flags.early ? labels.early : ''}${flags.closedBeta ? labels.closedBeta : ''}\nAvatar URL: ${apiData.data.avatarURL}`);
+                            return console.log(`${apiData.data.displayName ?? apiData.data.name} (@${apiData.data.name})${flags.system ? labels.system : ''}${flags.pro ? labels.pro : ''}${flags.dev ? labels.dev : ''}${flags.early ? labels.early : ''}${flags.closedBeta ? labels.closedBeta : ''}\nAvatar URL: ${apiData.data.avatarURL}`);
                         }
                         switch (apiData.error) {
                             case 8:
