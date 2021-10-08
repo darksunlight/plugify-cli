@@ -1,7 +1,8 @@
 const Websocket = require("ws");
-const fetch = require('node-fetch').default;
+const fetch = require("node-fetch").default;
 const fs = require("fs");
 const readline = require("readline");
+require("dotenv").config();
 
 let loggedIn = false;
 let isDead = false;
@@ -38,37 +39,37 @@ function fixStdoutFor(cli) {
     var oldStdout = process.stdout;
     var newStdout = Object.create(oldStdout);
     newStdout.write = function() {
-        cli.output.write('\x1b[2K\r');
+        cli.output.write("\x1b[2K\r");
         var result = oldStdout.write.apply(
             this,
             Array.prototype.slice.call(arguments)
         );
         cli._refreshLine();
         return result;
-    }
-    process.__defineGetter__('stdout', function() { return newStdout; });
+    };
+    process.__defineGetter__("stdout", function() { return newStdout; });
 }
 
 function expectArg(args) {
-    return `The first argument to this command must be one of the following: ${args.split(' ').join(', ')}`;
+    return `The first argument to this command must be one of the following: ${args.split(" ").join(", ")}`;
 }
 
 async function apiGet(path) {
-    return await (await fetch(`https://${process.env.API_DOMAIN ?? 'api.plugify.cf'}/v2/${path}`, {
-        method: 'GET',
+    return await (await fetch(`https://${process.env.API_DOMAIN ?? "api.plugify.cf"}/v2/${path}`, {
+        method: "GET",
         headers: {
-            'Content-Type': 'application/json',
-            'Authorization': token
+            "Content-Type": "application/json",
+            "Authorization": token
         }
     })).json();
 }
 
 async function apiPost(path, body) {
-    return await (await fetch(`https://${process.env.API_DOMAIN ?? 'api.plugify.cf'}/v2/${path}`, {
-        method: 'POST',
+    return await (await fetch(`https://${process.env.API_DOMAIN ?? "api.plugify.cf"}/v2/${path}`, {
+        method: "POST",
         headers: {
-            'Content-Type': 'application/json',
-            'Authorization': token
+            "Content-Type": "application/json",
+            "Authorization": token
         },
         body: JSON.stringify(body)
     })).json();
@@ -81,14 +82,14 @@ if (process.argv[2] == "auth") {
     return process.exit(0);
 }
 
-let token = '';
+let token = "";
 try {
     token = fs.readFileSync("token", { encoding: "utf-8" });
 } catch (_) {
     token = process.env.token;
 }
 
-const ws = new Websocket(`wss://${process.env.API_DOMAIN ?? 'api.plugify.cf'}/`);
+const ws = new Websocket(`wss://${process.env.API_DOMAIN ?? "api.plugify.cf"}/`);
 
 ws.onopen = () => {
     console.log("WS | Opened.");
@@ -100,14 +101,15 @@ ws.onopen = () => {
         ws.send(JSON.stringify({ event: 9001 })); 
         isDead = true; 
     }, 10000);
-}
+};
 
 ws.onmessage = async (event) => {
     const data = JSON.parse(event.data);
     switch (data.event) {
-        case 0:
-            ws.send(JSON.stringify({ event: 1, data: { token: token } }))
-            break
+        case 0: {
+            ws.send(JSON.stringify({ event: 1, data: { token: token } }));
+            break;
+        }
 
         case 2:
             loggedIn = true;
@@ -126,50 +128,53 @@ ws.onmessage = async (event) => {
                         break;
 
                     case ".join":
-                        if (!line[1]) return console.log('Please specify a channel ID.');
+                        if (!line[1]) return console.log("Please specify a channel ID.");
                         ws.send(JSON.stringify({ event: 4, data: { id: line[1] } }));
                         break;
 
-                    case ".channels":
+                    case ".channels": {
                         let currentGroup;
                         if (line[1]) {
                             currentGroup = line[1];
                         } else {
                             if (group.id) currentGroup = group.id;
-                            else return console.log('Please specify a group ID or join a channel first.');
+                            else return console.log("Please specify a group ID or join a channel first.");
                         }
                         const apiDataG = await apiGet(`groups/info/${currentGroup}`);
                         if (apiDataG.success && apiDataG.data.channels) return console.log(apiDataG.data.channels);
                         if (!apiDataG.success) {
                             switch (apiDataG.error) {
                                 case 9:
-                                    return console.log('Group doesn\'t exist or you aren\'t in it');
+                                    return console.log("Group doesn't exist or you aren't in it");
                                 default:
                                     return console.log(`Error: ${apiDataG.error}`);
                             }
                         }
-                        console.log('Unknown error.');
+                        console.log("Unknown error.");
                         break;
+                    }
 
                     case ".channel":
                         switch (line[1]) {
-                            case 'join':
-                                if (!line[2]) return console.log('Please specify a channel ID.');
+                            case "join": {
+                                if (!line[2]) return console.log("Please specify a channel ID.");
                                 ws.send(JSON.stringify({ event: 4, data: { id: line[1] } }));
                                 break;
-                            case 'create':
-                                if (!line[2]) return console.log('Please specify a channel name.');
-                                if (!line[3]) return console.log('Please specify a group ID.');
-                                const apiData = await apiPost('channels/create', {
-                                    'name': line[2],
-                                    'groupID': line[3],
-                                    'type': 'text'
+                            }
+                            case "create": {
+                                if (!line[2]) return console.log("Please specify a channel name.");
+                                if (!line[3]) return console.log("Please specify a group ID.");
+                                const apiData = await apiPost("channels/create", {
+                                    "name": line[2],
+                                    "groupID": line[3],
+                                    "type": "text"
                                 });
                                 if (apiData.success) return console.log(apiData.data);
                                 console.log(`Error: ${apiData.error}`);
                                 break;
+                            }
                             default:
-                                console.log(expectArg('join create'));
+                                console.log(expectArg("join create"));
                         }
                         break;
 
@@ -179,40 +184,40 @@ ws.onmessage = async (event) => {
 
                     case ".group":
                         switch (line[1]) {
-                            case 'info': {
-                                if (!line[2]) return console.log('Please specify a group ID.');
+                            case "info": {
+                                if (!line[2]) return console.log("Please specify a group ID.");
                                 const apiData = await apiGet(`groups/info/${line[2]}`);
                                 if (apiData.success) return console.log(apiData.data);
                                 console.log(`Error: ${apiData.error}`);
                                 break;
                             }
-                            case 'memberinfo': {
+                            case "memberinfo": {
                                 let currentGroup;
                                 if (line[2]) {
                                     currentGroup = line[2];
                                 } else {
                                     if (group.id) currentGroup = group.id;
-                                    else return console.log('Please specify a group ID or join a channel first.');
+                                    else return console.log("Please specify a group ID or join a channel first.");
                                 }
-                                const apiData = await apiGet(`groups/info/${line[2]}`);
+                                const apiData = await apiGet(`groups/info/${currentGroup}`);
                                 if (apiData.success) return console.log(apiData.data);
                                 console.log(`Error: ${apiData.error}`);
                                 break;
                             }
-                            case 'create': {
-                                if (!line[2]) return console.log('Please specify a name.');
-                                const apiData = await apiPost('groups/create', { 'name': line.slice(2).join(' ') });
+                            case "create": {
+                                if (!line[2]) return console.log("Please specify a name.");
+                                const apiData = await apiPost("groups/create", { "name": line.slice(2).join(" ") });
                                 if (apiData.success) return console.log(apiData.data);
                                 console.log(`Error: ${apiData.error}`);
                                 break;
                             }
-                            case 'roles': {
+                            case "roles": {
                                 let currentGroup;
                                 if (line[2]) {
                                     currentGroup = line[2];
                                 } else {
                                     if (group.id) currentGroup = group.id;
-                                    else return console.log('Please specify a group ID or join a channel first.');
+                                    else return console.log("Please specify a group ID or join a channel first.");
                                 }
                                 const apiData = await apiGet(`roles/group/${currentGroup}`);
                                 if (apiData.success) return console.log(apiData.data);
@@ -220,21 +225,21 @@ ws.onmessage = async (event) => {
                                 break;
                             }
                             default:
-                                console.log(expectArg('info create'));
+                                console.log(expectArg("info create"));
                         }
                         break;
                     
-                    case '.invite':
+                    case ".invite":
                         switch (line[1]) {
-                            case 'help':
-                                console.log('Subcommands: help, info, create, use\n\nhelp\n====\nDisplays help for this command.\n\ninfo [invite id]\n====\nGets info about a particular invite.\n\ncreate [group id] [uses (integer)] [expires (unix timestamp)]\n====\nCreates an invite for the specified group. Enter any non-positive number for unlimited uses. Enter 0 for no expiry.\n\nuse [invite id]\n====\nUses the given invite code.');
+                            case "help":
+                                console.log("Subcommands: help, info, create, use\n\nhelp\n====\nDisplays help for this command.\n\ninfo [invite id]\n====\nGets info about a particular invite.\n\ncreate [group id] [uses (integer)] [expires (unix timestamp)]\n====\nCreates an invite for the specified group. Enter any non-positive number for unlimited uses. Enter 0 for no expiry.\n\nuse [invite id]\n====\nUses the given invite code.");
                                 break;
-                            case 'info':
-                                if (!line[2]) return console.log('Please specify an invite ID.');
-                                fetch(`https://${process.env.API_DOMAIN ?? 'api.plugify.cf'}/v2/invites/info/${line[2]}`, {
-                                    method: 'GET',
+                            case "info":
+                                if (!line[2]) return console.log("Please specify an invite ID.");
+                                fetch(`https://${process.env.API_DOMAIN ?? "api.plugify.cf"}/v2/invites/info/${line[2]}`, {
+                                    method: "GET",
                                     headers: {
-                                        'Content-Type': 'application/json',
+                                        "Content-Type": "application/json",
                                     }
                                 }).then(function(response) {
                                     return response.json();
@@ -242,60 +247,62 @@ ws.onmessage = async (event) => {
                                     if (apiData.success) return console.log(apiData.data);
                                     switch (apiData.error) {
                                         case 9:
-                                            console.log('Group doesn\'t exist');
+                                            console.log("Group doesn't exist");
                                             break;
                                         case 13:
-                                            console.log('Invite doesn\'t exist');
+                                            console.log("Invite doesn't exist");
                                             break;
                                         default:
                                             console.log(`Error: ${apiData.error}`);
                                     }
                                 });
                                 break;
-                            case 'create':
-                                if (!line[2]) return console.log('Please specify a group ID.');
+                            case "create": {
+                                if (!line[2]) return console.log("Please specify a group ID.");
                                 let body = {
-                                    'id': line[2],
-                                    'uses': parseInt(line[3]) < 1 ? null : parseInt(line[3]),
-                                    'expires': line[4] === '0' ? null : new Date(parseInt(line[4])*1000)
+                                    "id": line[2],
+                                    "uses": parseInt(line[3]) < 1 ? null : parseInt(line[3]),
+                                    "expires": line[4] === "0" ? null : new Date(parseInt(line[4])*1000)
                                 };
-                                const apiData = await apiPost('invites/create', body);
-                                console.log(`Creating invite with following data: ${JSON.stringify(body)}`)
+                                const apiData = await apiPost("invites/create", body);
+                                console.log(`Creating invite with following data: ${JSON.stringify(body)}`);
                                 if (apiData.success) return console.log(apiData.data);
                                 switch (apiData.error) {
                                     case 9:
-                                        console.log('Group doesn\'t exist or you aren\'t in it');
+                                        console.log("Group doesn't exist or you aren't in it");
                                         break;
                                     default:
                                         console.log(`Error: ${apiData.error}`);
                                 }
                                 break;
-                            case 'use':
-                            case 'accept':
-                                if (!line[2]) return console.log('Please specify an invite ID.');
-                                const apiDataU = await apiPost('invites/use', { 'id': line[2] });
-                                if (apiDataU.success) return console.log(apiDataU.data);
-                                switch (apiDataU.error) {
+                            }
+                            case "use":
+                            case "accept": {
+                                if (!line[2]) return console.log("Please specify an invite ID.");
+                                const apiData = await apiPost("invites/use", { "id": line[2] });
+                                if (apiData.success) return console.log(apiData.data);
+                                switch (apiData.error) {
                                     case 9:
-                                        console.log('Group doesn\'t exist');
+                                        console.log("Group doesn't exist");
                                         break;
                                     case 13:
-                                        console.log('Invite doesn\'t exist');
+                                        console.log("Invite doesn't exist");
                                         break;
                                     default:
-                                        console.log(`Error: ${apiDataU.error}`);
+                                        console.log(`Error: ${apiData.error}`);
                                 }
                                 break;
+                            }
                             default:
-                                console.log(expectArg('help info create use accept'));
+                                console.log(expectArg("help info create use accept"));
                         }
                         break;
                     
                     case ".ui":
-                    case ".userinfo":
+                    case ".userinfo": {
                         let username = line[1];
                         if (!username) username = user.username;
-                        const apiData = await (await fetch(`https://${process.env.API_DOMAIN ?? 'api.plugify.cf'}/v2/users/info/${username.replace(/@/g, '')}`)).json();
+                        const apiData = await (await fetch(`https://${process.env.API_DOMAIN ?? "api.plugify.cf"}/v2/users/info/${username.replace(/@/g, "")}`)).json();
                         if (apiData.success) {
                             const flags = {
                                 pro: (apiData.data.flags & 1 << 0) === 1 << 0,
@@ -305,22 +312,23 @@ ws.onmessage = async (event) => {
                                 system: (apiData.data.flags & 1 << 4) === 1 << 4,
                             };
                             const labels = {
-                                pro: ' \x1b[42mPRO\x1b[0m',
-                                dev: ' \x1b[44mDEV\x1b[0m',
-                                early: ' \x1b[45mEARLY\x1b[0m',
-                                closedBeta: ' \x1b[43mBETA\x1b[0m',
-                                system: ' \x1b[44mSYSTEM\x1b[0m',
-                            }
-                            return console.log(`${apiData.data.displayName ?? apiData.data.name} (@${apiData.data.name})${flags.system ? labels.system : ''}${flags.pro ? labels.pro : ''}${flags.dev ? labels.dev : ''}${flags.early ? labels.early : ''}${flags.closedBeta ? labels.closedBeta : ''}\nAvatar URL: ${apiData.data.avatarURL}`);
+                                pro: " \x1b[42mPRO\x1b[0m",
+                                dev: " \x1b[44mDEV\x1b[0m",
+                                early: " \x1b[45mEARLY\x1b[0m",
+                                closedBeta: " \x1b[43mBETA\x1b[0m",
+                                system: " \x1b[44mSYSTEM\x1b[0m",
+                            };
+                            return console.log(`${apiData.data.displayName ?? apiData.data.name} (@${apiData.data.name})${flags.system ? labels.system : ""}${flags.pro ? labels.pro : ""}${flags.dev ? labels.dev : ""}${flags.early ? labels.early : ""}${flags.closedBeta ? labels.closedBeta : ""}\nAvatar URL: ${apiData.data.avatarURL}`);
                         }
                         switch (apiData.error) {
                             case 8:
-                                console.log('User doesn\'t exist');
+                                console.log("User doesn't exist");
                                 break;
                             default:
                                 console.log(`Error: ${apiData.error}`);
                         }
                         break;
+                    }
 
                     case ".eval":
                         eval(line[1]);
@@ -348,8 +356,8 @@ ws.onmessage = async (event) => {
             break;
 
         case 3:
-            console.log('Your account has not been verified yet. Please check your email and verify your account first.');
-            process.exit();
+            console.log("Your account has not been verified yet. Please check your email and verify your account first.");
+            return process.exit();
 
         case 5:
             channel = data.data.channel;
@@ -381,34 +389,35 @@ ws.onmessage = async (event) => {
             console.log(data.data);
             break;
         
-        case 16:
+        case 16: {
             const triggeredTime = new Date(data.data.triggeredAt);
-            const triggeredTimeString = `${triggeredTime.getHours() < 10 ? '0' : ''}${triggeredTime.getHours()}:${triggeredTime.getMinutes() < 10 ? '0' : ''}${triggeredTime.getMinutes()}`;
+            const triggeredTimeString = `${triggeredTime.getHours() < 10 ? "0" : ""}${triggeredTime.getHours()}:${triggeredTime.getMinutes() < 10 ? "0" : ""}${triggeredTime.getMinutes()}`;
             console.log(`${triggeredTimeString} [Plugify (@system)]: ${data.data.content}`);
             break;
+        }
         
         case 9001:
             isDead = false;
             break;
 
         default:
-            console.log(`WS >>`, data);
+            console.log("WS >>", data);
             break;
     }
-}
+};
 
 function handleMessage(data) {
     const author = data.author;
     users[author.username] = author;
     const time = new Date(data.timestamp);
-    const timeString = `${time.getHours() < 10 ? '0' : ''}${time.getHours()}:${time.getMinutes() < 10 ? '0' : ''}${time.getMinutes()}`;
+    const timeString = `${time.getHours() < 10 ? "0" : ""}${time.getHours()}:${time.getMinutes() < 10 ? "0" : ""}${time.getMinutes()}`;
     let content = data.content;
-    let output = '';
+    let output = "";
     if (content.match(new RegExp(`<@${user.username}>`))) {
-        output = '\x1b[47m\x1b[30m';
-        content = content.replace(/<@([a-z0-9_-]+)>/gi, '@$1');
+        output = "\x1b[47m\x1b[30m";
+        content = content.replace(/<@([a-z0-9_-]+)>/gi, "@$1");
     } else {
-        content = content.replace(/<@([a-z0-9_-]+)>/gi, '\x1b[47m\x1b[30m@$1\x1b[0m');
+        content = content.replace(/<@([a-z0-9_-]+)>/gi, "\x1b[47m\x1b[30m@$1\x1b[0m");
     }
     output += `${timeString} [${author.displayName} (@${author.username})]: ${content}\x1b[0m`;
     console.log(output);
