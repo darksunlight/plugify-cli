@@ -9,6 +9,7 @@
   "author": "PlugifyChat",
   "license": "MIT",
   "dependencies": {
+    "dotenv": "^10.0.0",
     "node-fetch": "^2.6.1",
     "ws": "^7.5.1"
   }
