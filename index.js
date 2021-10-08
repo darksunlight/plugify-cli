@@ -124,8 +124,7 @@ ws.onmessage = async (event) => {
                     case ".exit":
                     case ".quit":
                     case ".q":
-                        process.exit(0);
-                        break;
+                        return process.exit(0);
 
                     case ".join":
                         if (!line[1]) return console.log("Please specify a channel ID.");
@@ -140,14 +139,14 @@ ws.onmessage = async (event) => {
                             if (group.id) currentGroup = group.id;
                             else return console.log("Please specify a group ID or join a channel first.");
                         }
-                        const apiDataG = await apiGet(`groups/info/${currentGroup}`);
-                        if (apiDataG.success && apiDataG.data.channels) return console.log(apiDataG.data.channels);
-                        if (!apiDataG.success) {
-                            switch (apiDataG.error) {
+                        const apiData = await apiGet(`groups/info/${currentGroup}`);
+                        if (apiData.success && apiData.data.channels) return console.log(apiData.data.channels);
+                        if (!apiData.success) {
+                            switch (apiData.error) {
                                 case 9:
                                     return console.log("Group doesn't exist or you aren't in it");
                                 default:
-                                    return console.log(`Error: ${apiDataG.error}`);
+                                    return console.log(`Error: ${apiData.error}`);
                             }
                         }
                         console.log("Unknown error.");
