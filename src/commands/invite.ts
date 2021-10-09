@@ -3,7 +3,8 @@ import { Command, CommandExecuteArguments } from "@/types";
 export class InviteCommand implements Command {
     public data = {
         name: "invite",
-        aliases: []
+        aliases: [],
+        expectArg: "help info create use accept"
     }
     public async execute({ line, client }: CommandExecuteArguments): Promise<void> {
         switch (line[1]) {

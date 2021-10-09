@@ -13,11 +13,13 @@ export class RestCommand implements Command {
             case "get": {
                 const data = await client.rest.get(line[2]);
                 console.log(data);
+                console.log(data.data);
                 break;
             }
             case "post": {
                 const data = await client.rest.post(line[2], line[3] ? JSON.parse(line.slice(3).join(" ")) : null);
                 console.log(data);
+                console.log(data.data);
                 break;
             }
         }

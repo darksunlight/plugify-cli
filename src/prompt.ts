@@ -42,6 +42,8 @@ export class Prompt {
         if (line.startsWith(".group info ")) return this.groupCompleter(".group info ", line);
         if (line.startsWith(".invite create ")) return this.groupCompleter(".invite create ", line);
         if (line.startsWith(".join ")) return this.channelCompleter(".join ", line);
+        const checkCommand = this.client.commandHandler.commands.get(line.split(" ")[0].substring(1));
+        if (checkCommand && checkCommand.data.expectArg) return this.expectArgCompleter(line.split(" ")[0], line);
         const completions = [...this.client.commandHandler.commands.keys()].map(x => `.${x}`);
         const hits = completions.filter((c) => c.startsWith(line));
         return [hits.length ? hits : completions, line];
@@ -60,6 +62,12 @@ export class Prompt {
             return [hits.length ? hits : completions, line];
         }
         const completions = [...this.client.channels.keys()].map(x => `${command}${x}`);
+        const hits = completions.filter((c) => c.startsWith(line));
+        return [hits.length ? hits : completions, line];
+    }
+
+    private expectArgCompleter(command: string, line: string) {
+        const completions = this.client.commandHandler.commands.get(command.substring(1))!.data.expectArg!.split(" ").map(x => `${command} ${x}`);
         const hits = completions.filter((c) => c.startsWith(line));
         return [hits.length ? hits : completions, line];
     }

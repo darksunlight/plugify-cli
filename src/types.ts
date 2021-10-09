@@ -10,6 +10,7 @@ export interface Command {
     data: {
         name: string;
         aliases: string[];
+		expectArg?: string;
     };
     // eslint-disable-next-line no-unused-vars
     execute(arg: CommandExecuteArguments): void;

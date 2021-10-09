@@ -10,4 +10,5 @@ if (!process.env.TOKEN) {
     console.log("Please supply your token first.");
     process.exit(1);
 }
+console.log("Loading...");
 client.login(process.env.TOKEN);

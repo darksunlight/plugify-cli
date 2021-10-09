@@ -1,11 +1,13 @@
-import { Command, CommandExecuteArguments } from "@/types";
+import { Command, CommandExecuteArguments, GatewayEvent } from "@/types";
 
 export class GroupsCommand implements Command {
     public data = {
         name: "groups",
-        aliases: []
+        aliases: [],
+        expectArg: "fetch"
     }
-    public execute({ client }: CommandExecuteArguments): void {
+    public async execute({ line, client }: CommandExecuteArguments): Promise<void> {
+        if (line[1] && line[1] === "fetch") { return await client.gateway.send(GatewayEvent.GROUP_GET_REQUEST, null); } 
         console.log([...client.groups.values()].map(x => `${x.id} - ${x.name}`).join("\n"));
     }
     constructor() {}

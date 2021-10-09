@@ -2,9 +2,11 @@ import { Client } from "@/client";
 import { GatewayHandler } from "@/gateway";
 
 import { Command } from "@/types";
+import { ChannelCommand } from "@commands/channel";
 import { ChannelsCommand } from "@commands/channels";
 import { ExitCommand } from "@commands/exit";
 import { FocusCommand } from "@commands/focus";
+import { GroupCommand } from "@commands/group";
 import { GroupsCommand } from "@commands/groups";
 import { InviteCommand } from "@commands/invite";
 import { JoinCommand } from "@commands/join";
@@ -17,7 +19,7 @@ export class CommandHandler {
     constructor(public client: Client) {
         this.gateway = client.gateway;
         this.commands = new Map();
-        [ChannelsCommand, ExitCommand, FocusCommand, GroupsCommand, InviteCommand, JoinCommand, RestCommand].forEach(commandClass => {
+        [ChannelCommand, ChannelsCommand, ExitCommand, FocusCommand, GroupCommand, GroupsCommand, InviteCommand, JoinCommand, RestCommand].forEach(commandClass => {
             const command = new commandClass();
             this.commands.set(command.data.name, command);
             command.data.aliases.forEach(alias => {
