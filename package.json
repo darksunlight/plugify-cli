@@ -4,7 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "ts-node -r tsconfig-paths/register src/index.ts",
+    "build": "tsc -p .",
+    "lint": "eslint . --ext .ts",
+    "lint:fix": "eslint . --ext .ts --fix"
   },
   "author": "PlugifyChat",
   "license": "MIT",
@@ -14,6 +17,14 @@
     "ws": "^7.5.1"
   },
   "devDependencies": {
-    "eslint": "^7.32.0"
+    "@types/node": "^16.10.3",
+    "@types/node-fetch": "^2.5.12",
+    "@types/ws": "^8.2.0",
+    "@typescript-eslint/eslint-plugin": "^4.33.0",
+    "@typescript-eslint/parser": "^4.33.0",
+    "eslint": "^7.32.0",
+    "ts-node": "^10.2.1",
+    "tsconfig-paths": "^3.11.0",
+    "typescript": "^4.4.3"
   }
 }
