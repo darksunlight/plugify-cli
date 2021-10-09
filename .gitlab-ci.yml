@@ -8,7 +8,7 @@
 image: node:latest
 
 stages:
-    - .pre
+    - test
 
 # This folder is cached between builds
 # https://docs.gitlab.com/ee/ci/yaml/index.html#cache
@@ -17,7 +17,7 @@ cache:
     - node_modules/
 
 ESLint:
-    stage: .pre
+    stage: test
     script:
         - npm install
         - npm run lint
