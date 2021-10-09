@@ -1,0 +1,38 @@
+{
+    "compilerOptions": {
+        "target": "ES6",
+        "module": "CommonJS",
+        "strict": true,
+        "strictPropertyInitialization": false,
+        "noImplicitReturns": true,
+        "moduleResolution": "node",
+        "allowSyntheticDefaultImports": true,
+        "esModuleInterop": true,
+        "sourceMap": true,
+        "baseUrl": ".",
+        "lib": [
+            "ES6"
+        ],
+        "importsNotUsedAsValues": "preserve",
+        "paths": {
+            "@/*": [
+                "src/*"
+            ],
+            "@commands/*": [
+                "src/commands/*"
+            ]
+        },
+        "typeRoots": [
+            "node_modules/@types"
+        ],
+        "types": [
+            "node"
+        ],
+        "outDir": "./dist"
+    },
+    "include": [ "src" ],
+    "exclude": [
+        "/node_modules/",
+        "*.test.ts"
+    ]
+}
