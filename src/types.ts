@@ -11,6 +11,7 @@ export interface Command {
         name: string;
         aliases: string[];
 		expectArg?: string;
+		description?: string;
     };
     // eslint-disable-next-line no-unused-vars
     execute(arg: CommandExecuteArguments): void;
@@ -130,6 +131,7 @@ export interface Group {
 	createdAt: string;
 	updatedAt: string;
 	channels?: Map<string, Channel>;
+	roles?: Map<string, Role>;
 }
 
 export interface User {
@@ -154,4 +156,10 @@ export interface Message {
 	author: Member;
 	content: string;
 	timestamp: string;
+}
+
+export interface Role {
+	id: string;
+	name: string;
+	groupId: string;
 }

@@ -3,7 +3,8 @@ import { Command, CommandExecuteArguments } from "@/types";
 export class ChannelsCommand implements Command {
     public data = {
         name: "channels",
-        aliases: []
+        aliases: [],
+        description: "List channels"
     }
     public execute({ line, client }: CommandExecuteArguments): void {
         if (line[1]) {

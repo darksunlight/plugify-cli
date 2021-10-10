@@ -3,7 +3,8 @@ import { Command, CommandExecuteArguments } from "@/types";
 export class RestCommand implements Command {
     public data = {
         name: "rest",
-        aliases: []
+        aliases: [],
+        description: "For developers: make requests through the raw REST API"
     }
     public async execute({ line, client }: CommandExecuteArguments): Promise<void> {
         if (!line[1]) return console.log("Please supply a HTTP method");

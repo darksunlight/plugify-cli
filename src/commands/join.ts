@@ -3,7 +3,8 @@ import { Command, CommandExecuteArguments, GatewayEvent } from "@/types";
 export class JoinCommand implements Command {
     public data = {
         name: "join",
-        aliases: []
+        aliases: [],
+        description: "Join a channel"
     }
     public execute({ line, client }: CommandExecuteArguments): void {
         if (!line[1]) return console.log("Please specify a channel ID or channel name.");

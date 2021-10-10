@@ -44,6 +44,9 @@ export class Prompt {
             if (command.startsWith("group info ")) return this.groupCompleter(`${this.client.commandPrefix}group info `, line);
             if (command.startsWith("invite create ")) return this.groupCompleter(`${this.client.commandPrefix}invite create `, line);
             if (command.startsWith("join ")) return this.channelCompleter(`${this.client.commandPrefix}join `, line);
+            if (command.startsWith("channel info ")) return this.channelCompleter(`${this.client.commandPrefix}channel info `, line);
+            if (command.startsWith("roles info ") && this.client.focusedGroup && this.client.groups.get(this.client.focusedGroup) && this.client.groups.get(this.client.focusedGroup)!.roles) return this.roleCompleter(`${this.client.commandPrefix}roles info `, line, true);
+            if (command.startsWith("roles assign ") && this.client.focusedGroup && this.client.groups.get(this.client.focusedGroup) && this.client.groups.get(this.client.focusedGroup)!.roles) return this.roleCompleter(`${this.client.commandPrefix}roles assign `, line, false);
         }
         const checkCommand = this.client.commandHandler.commands.get(line.split(" ")[0].substring(this.client.commandPrefix.length));
         if (checkCommand && checkCommand.data.expectArg) return this.expectArgCompleter(line.split(" ")[0], line);
@@ -65,6 +68,13 @@ export class Prompt {
             return [hits.length ? hits : completions, line];
         }
         const completions = [...this.client.channels.keys()].map(x => `${command}${x}`);
+        const hits = completions.filter((c) => c.startsWith(line));
+        return [hits.length ? hits : completions, line];
+    }
+
+    private roleCompleter(command: string, line: string, defaultRole: boolean) {
+        const roles = [...this.client.groups.get(this.client.focusedGroup)!.roles!.keys()];
+        const completions = (defaultRole ? [...roles, "default"] : roles).map(x => `${command}${x}`);
         const hits = completions.filter((c) => c.startsWith(line));
         return [hits.length ? hits : completions, line];
     }

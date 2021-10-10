@@ -3,7 +3,8 @@ import { Command, CommandExecuteArguments } from "@/types";
 export class FocusCommand implements Command {
     public data = {
         name: "focus",
-        aliases: []
+        aliases: [],
+        description: "Focus on a group"
     }
     public execute({ line, client }: CommandExecuteArguments): void {
         if (!line[1]) return console.log("Please supply a valid group ID.");

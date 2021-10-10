@@ -4,7 +4,8 @@ export class InviteCommand implements Command {
     public data = {
         name: "invite",
         aliases: [],
-        expectArg: "help info create use accept"
+        expectArg: "help info create use accept",
+        description: "Use, create and get info about invites"
     }
     public async execute({ line, client }: CommandExecuteArguments): Promise<void> {
         switch (line[1]) {

@@ -4,7 +4,8 @@ export class GroupsCommand implements Command {
     public data = {
         name: "groups",
         aliases: [],
-        expectArg: "fetch"
+        expectArg: "fetch",
+        description: "List user's groups"
     }
     public async execute({ line, client }: CommandExecuteArguments): Promise<void> {
         if (line[1] && line[1] === "fetch") { return await client.gateway.send(GatewayEvent.GROUP_GET_REQUEST, null); } 

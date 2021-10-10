@@ -1,6 +1,6 @@
 import Websocket, { WebSocket } from "ws";
 import { Client } from "@/client";
-import { Channel, GatewayEvent, Group, Message } from "@/types";
+import { Channel, GatewayEvent, Group, Message, Role } from "@/types";
 
 export class GatewayHandler {
     public ws: WebSocket;
@@ -75,9 +75,16 @@ export class GatewayHandler {
 
                 case GatewayEvent.GROUP_GET_SUCCESS: {
                     const groups = data.data as Group[];
-                    groups.forEach(group => {
+                    groups.forEach(async group => {
                         this.client.groups.set(group.id, group);
                         this.send(GatewayEvent.ROOMS_GET_REQUEST, { groupID: group.id });
+                        const data = await this.client.rest.get<{ roles: Role[] }>(`/roles/group/${group.id}`);
+                        if (data.data) {
+                            if (!this.client.groups.get(group.id)!.roles) this.client.groups.get(group.id)!.roles = new Map();
+                            data.data!.roles.forEach(role => {
+                                this.client.groups.get(group.id)!.roles!.set(role.id, role);
+                            });
+                        }
                     });
                     break;
                 }
