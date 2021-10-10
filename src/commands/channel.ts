@@ -11,17 +11,27 @@ export class ChannelCommand implements Command {
         if (!line[1]) return console.log(client.prompt.expectArg(this.data.expectArg));
         switch (line[1]) {
             case "info": {
-                let channel;
+                let channel: string;
                 if (line[2]) channel = line[2];
                 else if (client.joinedChannel) channel = client.joinedChannel;
                 else return console.log("Please join a channel first or supply a valid channel ID");
-                if (!client.channels.get(channel)) return console.log(`The specified channel cannot be found. Try running \`${client.commandPrefix}groups fetch\`.`);
-                const data = await client.rest.get(`/channels/info/${client.channels.get(channel)!.groupId}/${channel}`);
-                if (data.success) {
-                    return console.log(data.data);
+                if (!client.channels.get(channel) && ![...client.channels.values()].filter(x => x.name === channel).length) return console.log(`The specified channel cannot be found. Try running \`${client.commandPrefix}groups fetch\`.`);
+                if (client.channels.get(channel)) {
+                    const data = await client.rest.get(`/channels/info/${client.channels.get(channel)!.groupId}/${channel}`);
+                    if (data.success) {
+                        return console.log(data.data);
+                    }
+                    console.log(`Error: ${data.error}`);
+                    if (data.data) console.log(data.data);
+                } else {
+                    const mappedChannel = [...client.channels.values()].filter(x => x.name === channel)[0];
+                    const data = await client.rest.get(`/channels/info/${mappedChannel.groupId}/${mappedChannel.id}`);
+                    if (data.success) {
+                        return console.log(data.data);
+                    }
+                    console.log(`Error: ${data.error}`);
+                    if (data.data) console.log(data.data);
                 }
-                console.log(`Error: ${data.error}`);
-                if (data.data) console.log(data.data);
                 break;
             }
             case "create": {

@@ -45,8 +45,14 @@ export class Prompt {
             if (command.startsWith("invite create ")) return this.groupCompleter(`${this.client.commandPrefix}invite create `, line);
             if (command.startsWith("join ")) return this.channelCompleter(`${this.client.commandPrefix}join `, line);
             if (command.startsWith("channel info ")) return this.channelCompleter(`${this.client.commandPrefix}channel info `, line);
-            if (command.startsWith("roles info ") && this.client.focusedGroup && this.client.groups.get(this.client.focusedGroup) && this.client.groups.get(this.client.focusedGroup)!.roles) return this.roleCompleter(`${this.client.commandPrefix}roles info `, line, true);
-            if (command.startsWith("roles assign ") && this.client.focusedGroup && this.client.groups.get(this.client.focusedGroup) && this.client.groups.get(this.client.focusedGroup)!.roles) return this.roleCompleter(`${this.client.commandPrefix}roles assign `, line, false);
+            if (command.startsWith("roles ") && this.client.focusedGroup && this.client.groups.get(this.client.focusedGroup) && this.client.groups.get(this.client.focusedGroup)!.roles) {
+                if (command.startsWith("roles info ")) return this.roleCompleter(`${this.client.commandPrefix}roles info `, line, true);
+                if (command.startsWith("roles assign ")) return this.roleCompleter(`${this.client.commandPrefix}roles assign `, line, false);
+                if (command.startsWith("roles edit ")) {
+                    if (command.substring(11).match(/^[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12} $/)) return this.rolesEditCompleter(line);
+                    else return this.roleCompleter(`${this.client.commandPrefix}roles edit `, line, false);
+                }
+            }
         }
         const checkCommand = this.client.commandHandler.commands.get(line.split(" ")[0].substring(this.client.commandPrefix.length));
         if (checkCommand && checkCommand.data.expectArg) return this.expectArgCompleter(line.split(" ")[0], line);
@@ -81,6 +87,13 @@ export class Prompt {
 
     private expectArgCompleter(command: string, line: string) {
         const completions = this.client.commandHandler.commands.get(command.substring(this.client.commandPrefix.length))!.data.expectArg!.split(" ").map(x => `${command} ${x}`);
+        const hits = completions.filter((c) => c.startsWith(line));
+        return [hits.length ? hits : completions, line];
+    }
+
+    private rolesEditCompleter(line: string) {
+        const keys = ["name:", "permissions:"];
+        const completions = keys.map(x => `${line}${x}`);
         const hits = completions.filter((c) => c.startsWith(line));
         return [hits.length ? hits : completions, line];
     }

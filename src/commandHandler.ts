@@ -4,6 +4,7 @@ import { GatewayHandler } from "@/gateway";
 import { Command } from "@/types";
 import { ChannelCommand } from "@commands/channel";
 import { ChannelsCommand } from "@commands/channels";
+import { EvalCommand } from "@commands/eval";
 import { ExitCommand } from "@commands/exit";
 import { FocusCommand } from "@commands/focus";
 import { GroupCommand } from "@commands/group";
@@ -23,7 +24,7 @@ export class CommandHandler {
         this.gateway = client.gateway;
         this.commands = new Map();
         this.commandsWithoutAliases = new Map();
-        [ChannelCommand, ChannelsCommand, ExitCommand, FocusCommand, GroupCommand, GroupsCommand, HelpCommand, InviteCommand, JoinCommand, RestCommand, RolesCommand].forEach(commandClass => {
+        [ChannelCommand, ChannelsCommand, EvalCommand, ExitCommand, FocusCommand, GroupCommand, GroupsCommand, HelpCommand, InviteCommand, JoinCommand, RestCommand, RolesCommand].forEach(commandClass => {
             const command = new commandClass();
             this.commands.set(command.data.name, command);
             this.commandsWithoutAliases.set(command.data.name, command);

@@ -5,7 +5,7 @@ export class RolesCommand implements Command {
     public data = {
         name: "roles",
         aliases: [],
-        expectArg: "info create assign list fetch",
+        expectArg: "info create assign edit list fetch",
         description: "List, create, assign and get info about roles"
     }
     public async execute({ line, client }: CommandExecuteArguments): Promise<void> {
@@ -18,7 +18,11 @@ export class RolesCommand implements Command {
                     const data = await client.rest.get(`/roles/info/${client.focusedGroup}`);
                     return console.log(data.data);
                 }
-                console.log(client.groups.get(client.focusedGroup)!.roles!.get(line[2]));
+                if (!client.groups.get(client.focusedGroup)!.roles!.get(line[2])) return console.log("Please supply a valid role ID");
+                const data = await client.rest.get<Role>(`/roles/info/${client.focusedGroup}/${line[2]}`);
+                if (data.data) {
+                    Object.assign(client.groups.get(client.focusedGroup)!.roles!.get(line[2]), data.data);
+                }
                 break;
             }
             case "create": {
@@ -45,8 +49,44 @@ export class RolesCommand implements Command {
                 break;
             }
             case "assign": {
-                if (!line[2]) return console.log("Please supply a valid role ID");
+                if (!line[2]) return console.log("Please supply a valid role ID.");
                 console.log(client.groups.get(client.focusedGroup)!.roles!.get(line[2]));
+                break;
+            }
+            case "edit": {
+                if (!line[2]) return console.log("Please supply a valid role ID or `default`.");
+                const roles = client.groups.get(client.focusedGroup)!.roles;
+                if (!roles) return console.log("There are either no roles in this group");
+                const role = roles.get(line[2]);
+                if (!role) return console.log("Please supply a valid role ID.");
+                let name = role.name;
+                if (!role.permissions) await this.fetchRoles(client);
+                if (!role.permissions) return console.log("Failed to fetch permission data for provided role. Please run the command again.");
+                let permissions = role.permissions;
+                const matches = [line.join(" ").match(/\sname:((?!\s).)+/), line.join(" ").match(/\spermissions:((?!\s)\d)+/)];
+                if (matches[0]) name = matches[0][0].substring(6);
+                if (matches[1]) permissions = parseInt(matches[1][0].substring(13));
+                const data = await client.rest.post("/roles/edit", {
+                    "groupID": client.focusedGroup,
+                    "roleID": line[2] === "default" ? undefined : line[2],
+                    "name": name,
+                    "permissions": permissions
+                });
+                if (data.success) {
+                    console.log(data.data);
+                    this.fetchRoles(client);
+                    return;
+                }
+                switch (data.error) {
+                    case 14: {
+                        console.log("Not enough permissions!");
+                        break;
+                    }
+                    default: {
+                        console.log(`Error: ${data.error}`);
+                        if (data.data) console.log(data.data);
+                    }
+                }
                 break;
             }
             case "list": {
@@ -75,8 +115,12 @@ export class RolesCommand implements Command {
         const data = await client.rest.get<{ roles: Role[] }>(`/roles/group/${client.focusedGroup}`);
         if (data.data) {
             if (!client.groups.get(client.focusedGroup)!.roles) client.groups.get(client.focusedGroup)!.roles = new Map();
-            data.data!.roles.forEach(role => {
+            data.data!.roles.forEach(async role => {
                 client.groups.get(client.focusedGroup)!.roles!.set(role.id, role);
+                const data = await client.rest.get<Role>(`/roles/info/${client.focusedGroup}/${role.id}`);
+                if (data.data) {
+                    Object.assign(client.groups.get(client.focusedGroup)!.roles!.get(role.id), data.data);
+                }
             });
             return data.data.roles;
         }
