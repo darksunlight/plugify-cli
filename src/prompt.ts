@@ -37,14 +37,17 @@ export class Prompt {
     }
 
     private completer(line: string) {
-        if (line.startsWith(".focus ")) return this.groupCompleter(".focus ", line);
-        if (line.startsWith(".channels ")) return this.groupCompleter(".channels ", line);
-        if (line.startsWith(".group info ")) return this.groupCompleter(".group info ", line);
-        if (line.startsWith(".invite create ")) return this.groupCompleter(".invite create ", line);
-        if (line.startsWith(".join ")) return this.channelCompleter(".join ", line);
-        const checkCommand = this.client.commandHandler.commands.get(line.split(" ")[0].substring(1));
+        if (line.startsWith(this.client.commandPrefix)) {
+            const command = line.substring(this.client.commandPrefix.length);
+            if (command.startsWith("focus ")) return this.groupCompleter(`${this.client.commandPrefix}focus `, line);
+            if (command.startsWith("channels ")) return this.groupCompleter(`${this.client.commandPrefix}channels `, line);
+            if (command.startsWith("group info ")) return this.groupCompleter(`${this.client.commandPrefix}group info `, line);
+            if (command.startsWith("invite create ")) return this.groupCompleter(`${this.client.commandPrefix}invite create `, line);
+            if (command.startsWith("join ")) return this.channelCompleter(`${this.client.commandPrefix}join `, line);
+        }
+        const checkCommand = this.client.commandHandler.commands.get(line.split(" ")[0].substring(this.client.commandPrefix.length));
         if (checkCommand && checkCommand.data.expectArg) return this.expectArgCompleter(line.split(" ")[0], line);
-        const completions = [...this.client.commandHandler.commands.keys()].map(x => `.${x}`);
+        const completions = [...this.client.commandHandler.commands.keys()].map(x => `${this.client.commandPrefix}${x}`);
         const hits = completions.filter((c) => c.startsWith(line));
         return [hits.length ? hits : completions, line];
     }
@@ -67,7 +70,7 @@ export class Prompt {
     }
 
     private expectArgCompleter(command: string, line: string) {
-        const completions = this.client.commandHandler.commands.get(command.substring(1))!.data.expectArg!.split(" ").map(x => `${command} ${x}`);
+        const completions = this.client.commandHandler.commands.get(command.substring(this.client.commandPrefix.length))!.data.expectArg!.split(" ").map(x => `${command} ${x}`);
         const hits = completions.filter((c) => c.startsWith(line));
         return [hits.length ? hits : completions, line];
     }
@@ -75,12 +78,12 @@ export class Prompt {
     public startListener(): void {
         this.rl.on("line", async (input) => {
             const line = input.split(" ");
-            if (line[0].startsWith(".") && this.client.commandHandler.isCommand(line[0].substring(1))) {
-                await this.client.commandHandler.execute(line[0].substring(1), line);
+            if (line[0].startsWith(this.client.commandPrefix) && this.client.commandHandler.isCommand(line[0].substring(this.client.commandPrefix.length))) {
+                await this.client.commandHandler.execute(line[0].substring(this.client.commandPrefix.length), line);
                 return this.prompt();
             }
             if (!this.client.joinedChannel) {
-                console.log("You should join a channel. Use `.join <channel ID>` for that.");
+                console.log(`You should join a channel. Use \`${this.client.commandPrefix}join <channel ID>\` for that.`);
                 return this.prompt();
             }
             if (this.client.gateway.ws.readyState == 1 && this.client.loggedIn) {

@@ -8,6 +8,7 @@ export class Client {
     public isDead = false;
     public loggedIn = false;
     public token: string;
+    public commandPrefix = process.env.COMMAND_PREFIX ?? ".";
 
     public gateway: GatewayHandler;
     public commandHandler: CommandHandler;

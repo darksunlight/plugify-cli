@@ -1,4 +1,4 @@
-import { Client } from "./client";
+import { Client } from "@/client";
 
 /* eslint-disable no-unused-vars */
 export type CommandExecuteArguments = {

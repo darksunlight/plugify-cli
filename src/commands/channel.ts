@@ -10,7 +10,7 @@ export class ChannelCommand implements Command {
         if (!line[1]) return console.log(client.prompt.expectArg("create"));
         switch (line[1]) {
             case "create": {
-                if (!client.focusedGroup) return console.log("Please focus on a group by using `.focus` or joining a channel");
+                if (!client.focusedGroup) return console.log(`Please focus on a group by using \`${client.commandPrefix}focus\` or joining a channel`);
                 if (!line[2]) return console.log("Please specify a channel name.");
                 const data = await client.rest.post("/channels/create", {
                     "name": line[2],
