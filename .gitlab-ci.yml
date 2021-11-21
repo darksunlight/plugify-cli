@@ -29,4 +29,6 @@ Build all:
         - npm run build
     artifacts:
         paths:
-            - bin/
+            - bin/plugify-cli-linux
+            - bin/plugify-cli-macos
+            - bin/plugify-cli-win.exe
