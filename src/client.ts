@@ -19,10 +19,11 @@ export class Client {
     public groups: Map<string, Group>;
     public users: Map<string, User>;
 
-    public joinedChannel: string;
+    public joinedChannel = "";
     public focusedGroup: string;
     public user: User;
     public apiDomain = process.env.API_DOMAIN ?? "api.plugify.cf";
+    public insecure = process.env.API_INSECURE === "true";
 
     constructor() {
         this.channels = new Map();

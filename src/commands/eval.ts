@@ -4,7 +4,7 @@ export class EvalCommand implements Command {
     public data = {
         name: "eval",
         aliases: [],
-        description: "For developers: DO NOT USE THIS IF YOU DO NOT KNOW WHAT YOU ARE DOING. Evaluate the given script."
+        description: "DO NOT USE THIS IF YOU DO NOT KNOW WHAT YOU ARE DOING. Evaluate the given script."
     }
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     public execute({ line, client }: CommandExecuteArguments): void {

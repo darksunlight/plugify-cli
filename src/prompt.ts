@@ -42,9 +42,13 @@ export class Prompt {
             if (command.startsWith("focus ")) return this.groupCompleter(`${this.client.commandPrefix}focus `, line);
             if (command.startsWith("channels ")) return this.groupCompleter(`${this.client.commandPrefix}channels `, line);
             if (command.startsWith("group info ")) return this.groupCompleter(`${this.client.commandPrefix}group info `, line);
+            if (command.startsWith("group invites ")) return this.groupCompleter(`${this.client.commandPrefix}group invites `, line);
+            if (command.startsWith("group bans ")) return this.groupCompleter(`${this.client.commandPrefix}group bans `, line);
             if (command.startsWith("invite create ")) return this.groupCompleter(`${this.client.commandPrefix}invite create `, line);
             if (command.startsWith("join ")) return this.channelCompleter(`${this.client.commandPrefix}join `, line);
             if (command.startsWith("channel info ")) return this.channelCompleter(`${this.client.commandPrefix}channel info `, line);
+            if (command.startsWith("channel edit ")) return this.channelCompleter(`${this.client.commandPrefix}channel edit `, line);
+            if (command.startsWith("channel delete ")) return this.channelCompleter(`${this.client.commandPrefix}channel delete `, line);
             if (command.startsWith("roles ") && this.client.focusedGroup && this.client.groups.get(this.client.focusedGroup) && this.client.groups.get(this.client.focusedGroup)!.roles) {
                 if (command.startsWith("roles info ")) return this.roleCompleter(`${this.client.commandPrefix}roles info `, line, true);
                 if (command.startsWith("roles assign ")) return this.roleCompleter(`${this.client.commandPrefix}roles assign `, line, false);
@@ -73,6 +77,10 @@ export class Prompt {
             const hits = completions.filter((c) => c.startsWith(line));
             return [hits.length ? hits : completions, line];
         }
+        return this.fullChannelCompleter(command, line);
+    }
+
+    private fullChannelCompleter(command: string, line: string) {
         const completions = [...this.client.channels.keys()].map(x => `${command}${x}`);
         const hits = completions.filter((c) => c.startsWith(line));
         return [hits.length ? hits : completions, line];

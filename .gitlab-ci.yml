@@ -9,6 +9,7 @@ image: node:latest
 
 stages:
     - test
+    - build
 
 # This folder is cached between builds
 # https://docs.gitlab.com/ee/ci/yaml/index.html#cache
@@ -21,3 +22,11 @@ ESLint:
     script:
         - npm install
         - npm run lint
+
+Build all:
+    stage: build
+    script:
+        - npm run build
+    artifacts:
+        paths:
+            - bin/

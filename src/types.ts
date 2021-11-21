@@ -43,6 +43,19 @@ export enum GatewayEvent {
 
 	SYSTEM_ANNOUNCEMENT = 16,
 
+	APP_LOGIN_AUTHENTICATE = 17,
+	APP_LOGIN_AUTHENTICATE_SUCCESS = 18,
+	APP_LOGIN_AUTHENTICATE_ERROR = 19,
+	APP_LOGIN_ACCEPT = 20,
+	APP_LOGIN_REJECT = 21,
+
+	GROUP_REMOVED = 22,
+	CHANNEL_REMOVED = 23,
+
+	CHANNEL_CREATE = 30,
+	CHANNEL_DISCONNECT = 31,
+	CHANNEL_UPDATE = 32,
+
 	PING = 9001
 }
 
@@ -62,9 +75,24 @@ export enum Permissions {
 	ViewMessages = 1 << 0,
 	SendMessages = 1 << 1,
 
-	ManageChannels = 1 << 2,
-	ManageRoles = 1 << 3,
-	ManageMessages = 1 << 4
+	BanMembers = 1 << 2,
+	KickMembers = 1 << 3,
+
+	ManageGroup = 1 << 4,
+	ManageRoles = 1 << 5,
+	ManageChannels = 1 << 6,
+	ManageMessages = 1 << 7,
+	ManageInvites = 1 << 8,
+	ManageMembers = 1 << 9,
+	ManageSelfMember = 1 << 10,
+	ManageWebhooks = 1 << 11,
+
+	ViewChannelHistory = 1 << 12,
+	ViewAuditLog = 1 << 13,
+	CreateInvite = 1 << 14,
+	AttachFiles = 1 << 15,
+
+	All = ~(~0 << 16)
 }
 
 /* export ??? GatewayRequest {
@@ -111,6 +139,14 @@ export enum APIError {
     NO_INVITE_CODE,
     INVALID_USERNAME,
     ALREADY_IN_GROUP,
+	NO_SUCH_APP,
+	INVALID_SECRET,
+	NO_SUCH_CHANNEL,
+	NO_SUCH_MEMBER,
+	USER_BANNED,
+	USER_NOT_BANNED,
+	NO_SUCH_ROLE,
+	NO_SUCH_OVERRIDE,
 }
 
 export interface Channel {

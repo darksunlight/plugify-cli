@@ -2,10 +2,10 @@
   "name": "plugify-cli",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "bin": "dist/index.js",
   "scripts": {
     "start": "ts-node -r tsconfig-paths/register src/index.ts",
-    "build": "tsc -p .",
+    "build": "tsc -p . && tsc-alias && pkg . --out-path ./bin",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix"
   },
@@ -23,7 +23,9 @@
     "@typescript-eslint/eslint-plugin": "^4.33.0",
     "@typescript-eslint/parser": "^4.33.0",
     "eslint": "^7.32.0",
+    "pkg": "^5.4.1",
     "ts-node": "^10.2.1",
+    "tsc-alias": "^1.4.1",
     "tsconfig-paths": "^3.11.0",
     "typescript": "^4.4.3"
   }

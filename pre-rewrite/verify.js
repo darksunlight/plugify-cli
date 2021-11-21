@@ -1,7 +1,7 @@
 if (!process.argv[2]) return console.log("Please follow the instructions in the invitation.");
 require("dotenv").config();
 const fetch = require("node-fetch").default;
-fetch(`https://${process.env.API_DOMAIN ?? "api.plugify.cf"}/v2/users/verify`, {
+fetch(`http${process.env.API_INSECURE === "true" ? "": "s"}://${process.env.API_DOMAIN ?? "api.plugify.cf"}/v2/users/verify`, {
     method: "POST",
     headers: {
         "Content-Type": "application/json",

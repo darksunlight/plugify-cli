@@ -1,18 +1,16 @@
 import Websocket, { WebSocket } from "ws";
 import { Client } from "@/client";
-import { Channel, GatewayEvent, Group, Message, Role } from "@/types";
+import { Channel, GatewayEvent, Group, Message } from "@/types";
 
 export class GatewayHandler {
     public ws: WebSocket;
-    public domain: string;
     public client: Client;
     constructor(client: Client) {
-        this.domain = client.apiDomain;
         this.client = client;
     }
 
     async init(): Promise<void> {
-        this.ws = new Websocket(`wss://${this.domain}/`);
+        this.ws = new Websocket(`ws${this.client.insecure ? "": "s"}://${this.client.apiDomain}/`);
         this.ws.onopen = () => {
             console.log("WS | Opened.");
             setInterval(() => {
@@ -47,7 +45,6 @@ export class GatewayHandler {
                 case GatewayEvent.AUTHENTICATE_ERROR: {
                     console.log("Authentication error: %s", data.data);
                     process.exit(1);
-                    
                 }
 
                 // eslint-disable-next-line no-fallthrough
@@ -78,13 +75,13 @@ export class GatewayHandler {
                     groups.forEach(async group => {
                         this.client.groups.set(group.id, group);
                         this.send(GatewayEvent.ROOMS_GET_REQUEST, { groupID: group.id });
-                        const data = await this.client.rest.get<{ roles: Role[] }>(`/roles/group/${group.id}`);
+                        /* const data = await this.client.rest.get<{ roles: Role[] }>(`/roles/group/${group.id}`);
                         if (data.data) {
                             if (!this.client.groups.get(group.id)!.roles) this.client.groups.get(group.id)!.roles = new Map();
                             data.data!.roles.forEach(role => {
                                 this.client.groups.get(group.id)!.roles!.set(role.id, role);
                             });
-                        }
+                        } */
                     });
                     break;
                 }
@@ -102,12 +99,48 @@ export class GatewayHandler {
                     break;
                 }
 
+                case GatewayEvent.CHANNEL_REMOVED: {
+                    console.log("Channel removed:", data.data);
+                    this.client.channels.delete(data.data.id);
+                    if (this.client.joinedChannel === data.data.id) {
+                        this.client.joinedChannel = "";
+                        this.client.prompt.setPrompt(`${this.client.user.displayName ?? this.client.user.username}, #none> `);
+                    }
+                    break;
+                }
+
+                case GatewayEvent.GROUP_REMOVED: {
+                    console.log("Group removed:", data.data);
+                    this.client.groups.delete(data.data.id);
+                    if (this.client.channels.get(this.client.joinedChannel)?.groupId === data.data.id) {
+                        this.client.joinedChannel = "";
+                        this.client.prompt.setPrompt(`${this.client.user.displayName ?? this.client.user.username}, #none> `);
+                    }
+                    if (this.client.focusedGroup === data.data.id) {
+                        this.client.focusedGroup = "";
+                    }
+                    break;
+                }
+
+                case GatewayEvent.CHANNEL_DISCONNECT: {
+                    console.log("Channel disconnect:", data.data);
+                    if (this.client.joinedChannel === data.data.id) {
+                        this.client.joinedChannel = "";
+                        this.client.prompt.setPrompt(`${this.client.user.displayName ?? this.client.user.username}, #none> `);
+                    }
+                    break;
+                }
+
                 case GatewayEvent.PING: {
                     this.client.isDead = false;
                     break;
                 }
 
-                case GatewayEvent.MESSAGE_SEND_ERROR:
+                case GatewayEvent.MESSAGE_SEND_ERROR: {
+                    console.log("Failed to send message:", data.data);
+                    break;
+                }
+
                 case GatewayEvent.MESSAGE_SEND_SUCCESS: {
                     break;
                 }

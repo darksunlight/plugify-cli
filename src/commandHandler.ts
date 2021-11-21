@@ -13,7 +13,8 @@ import { HelpCommand } from "@commands/help";
 import { InviteCommand } from "@commands/invite";
 import { JoinCommand } from "@commands/join";
 import { RestCommand } from "@commands/rest";
-import { RolesCommand } from "@commands/roles";
+// import { RolesCommand } from "@commands/roles";
+import { RoleCommand } from "@commands/role";
 // import { FooBarCommand } from "@commands/foobar";
 
 export class CommandHandler {
@@ -24,7 +25,7 @@ export class CommandHandler {
         this.gateway = client.gateway;
         this.commands = new Map();
         this.commandsWithoutAliases = new Map();
-        [ChannelCommand, ChannelsCommand, EvalCommand, ExitCommand, FocusCommand, GroupCommand, GroupsCommand, HelpCommand, InviteCommand, JoinCommand, RestCommand, RolesCommand].forEach(commandClass => {
+        [ChannelCommand, ChannelsCommand, EvalCommand, ExitCommand, FocusCommand, GroupCommand, GroupsCommand, HelpCommand, InviteCommand, JoinCommand, RestCommand, RoleCommand].forEach(commandClass => {
             const command = new commandClass();
             this.commands.set(command.data.name, command);
             this.commandsWithoutAliases.set(command.data.name, command);
