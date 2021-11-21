@@ -5,7 +5,7 @@
   "bin": "dist/index.js",
   "scripts": {
     "start": "ts-node -r tsconfig-paths/register src/index.ts",
-    "build": "tsc -p . && tsc-alias && pkg . --out-path ./bin",
+    "build": "tsc -p . && tsc-alias && pkg . -t node16-linux-x64,node16-macos-x64,node16-win-x64 -C GZip --out-path ./bin",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix"
   },

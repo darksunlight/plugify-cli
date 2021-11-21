@@ -13,9 +13,7 @@ import { HelpCommand } from "@commands/help";
 import { InviteCommand } from "@commands/invite";
 import { JoinCommand } from "@commands/join";
 import { RestCommand } from "@commands/rest";
-// import { RolesCommand } from "@commands/roles";
 import { RoleCommand } from "@commands/role";
-// import { FooBarCommand } from "@commands/foobar";
 
 export class CommandHandler {
     public readonly commands: Map<string, Command>;
