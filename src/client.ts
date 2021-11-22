@@ -24,6 +24,7 @@ export class Client {
     public user: User;
     public apiDomain = process.env.API_DOMAIN ?? "api.plugify.cf";
     public insecure = process.env.API_INSECURE === "true";
+    public allRooms = process.env.ALL_ROOMS === "true";
 
     constructor() {
         this.channels = new Map();

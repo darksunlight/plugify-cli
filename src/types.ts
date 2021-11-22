@@ -14,7 +14,7 @@ export interface Command {
 		description?: string;
     };
     // eslint-disable-next-line no-unused-vars
-    execute(arg: CommandExecuteArguments): void;
+    execute(arg: CommandExecuteArguments): void | Promise<void>;
 }
 
 export enum GatewayEvent {

@@ -27,7 +27,10 @@ export class GatewayHandler {
             const data = JSON.parse(event.data);
             switch (data.event) {
                 case GatewayEvent.WELCOME: {
-                    this.send<{ token: string; }>(GatewayEvent.AUTHENTICATE, { token: this.client.token });
+                    this.send<{ token: string; allRooms?: boolean; }>(GatewayEvent.AUTHENTICATE, {
+                        token: this.client.token,
+                        allRooms: this.client.allRooms ? true : undefined
+                    });
                     break;
                 }
 
