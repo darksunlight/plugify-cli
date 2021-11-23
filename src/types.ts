@@ -6,12 +6,19 @@ export type CommandExecuteArguments = {
 	client: Client;
 }
 
+export enum AllRoomsSupport {
+	None = 0,
+	Modified = 1,
+	Full = 2
+}
+
 export interface Command {
     data: {
         name: string;
         aliases: string[];
 		expectArg?: string;
 		description?: string;
+		allRooms?: AllRoomsSupport;
     };
     // eslint-disable-next-line no-unused-vars
     execute(arg: CommandExecuteArguments): void | Promise<void>;

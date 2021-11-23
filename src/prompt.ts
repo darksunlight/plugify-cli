@@ -118,7 +118,7 @@ export class Prompt {
                 return this.prompt();
             }
             if (this.client.gateway.ws.readyState == 1 && this.client.loggedIn) {
-                this.client.gateway.send(GatewayEvent.MESSAGE_SEND, { content: input });
+                this.client.gateway.send(GatewayEvent.MESSAGE_SEND, { content: input, channelID: this.client.allRooms ? this.client.joinedChannel : undefined });
                 return this.prompt();
             }
         });
