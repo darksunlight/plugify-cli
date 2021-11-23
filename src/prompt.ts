@@ -39,16 +39,10 @@ export class Prompt {
     private completer(line: string) {
         if (line.startsWith(this.client.commandPrefix)) {
             const command = line.substring(this.client.commandPrefix.length);
-            if (command.startsWith("focus ")) return this.groupCompleter(`${this.client.commandPrefix}focus `, line);
-            if (command.startsWith("channels ")) return this.groupCompleter(`${this.client.commandPrefix}channels `, line);
-            if (command.startsWith("group info ")) return this.groupCompleter(`${this.client.commandPrefix}group info `, line);
-            if (command.startsWith("group invites ")) return this.groupCompleter(`${this.client.commandPrefix}group invites `, line);
-            if (command.startsWith("group bans ")) return this.groupCompleter(`${this.client.commandPrefix}group bans `, line);
-            if (command.startsWith("invite create ")) return this.groupCompleter(`${this.client.commandPrefix}invite create `, line);
-            if (command.startsWith("join ")) return this.channelCompleter(`${this.client.commandPrefix}join `, line);
-            if (command.startsWith("channel info ")) return this.channelCompleter(`${this.client.commandPrefix}channel info `, line);
-            if (command.startsWith("channel edit ")) return this.channelCompleter(`${this.client.commandPrefix}channel edit `, line);
-            if (command.startsWith("channel delete ")) return this.channelCompleter(`${this.client.commandPrefix}channel delete `, line);
+            const groupCompletion = ["focus ", "channels ", "group info ", "group invites ", "group bans ", "invite create "].filter(x => command.startsWith(x));
+            const channelCompletion = ["join ", "channel info ", "channel edit ", "channel delete "].filter(x => command.startsWith(x));
+            if (groupCompletion.length === 1) return this.groupCompleter(`${this.client.commandPrefix}${groupCompletion[0]}`, line);
+            if (channelCompletion.length === 1) return this.channelCompleter(`${this.client.commandPrefix}${channelCompletion[0]}`, line);
             if (command.startsWith("roles ") && this.client.focusedGroup && this.client.groups.get(this.client.focusedGroup) && this.client.groups.get(this.client.focusedGroup)!.roles) {
                 if (command.startsWith("roles info ")) return this.roleCompleter(`${this.client.commandPrefix}roles info `, line, true);
                 if (command.startsWith("roles assign ")) return this.roleCompleter(`${this.client.commandPrefix}roles assign `, line, false);
