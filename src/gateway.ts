@@ -109,6 +109,7 @@ export class GatewayHandler {
                         this.client.joinedChannel = "";
                         this.client.prompt.setPrompt(`${this.client.user.displayName ?? this.client.user.username}, #none> `);
                     }
+                    this.client.gateway.send(GatewayEvent.GROUP_GET_REQUEST, null);
                     break;
                 }
 
@@ -122,6 +123,7 @@ export class GatewayHandler {
                     if (this.client.focusedGroup === data.data.id) {
                         this.client.focusedGroup = "";
                     }
+                    this.client.gateway.send(GatewayEvent.GROUP_GET_REQUEST, null);
                     break;
                 }
 

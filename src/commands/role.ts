@@ -35,7 +35,7 @@ export class RoleCommand implements Command {
             }
             case "create": {
                 if (!client.focusedGroup) return console.log("Please focus on a group first or supply a valid group ID.");
-                if (!line[2]) return console.log("Please specify what to edit.");
+                if (!line[2]) return console.log("Please specify parameters.");
                 const args = Object.fromEntries(line.slice(2).join(" ").split(";").map(x => x.split(":")).filter(x => ["name", "hoist", "order", "permissions"].includes(x[0])));
                 if ("name" in args && args["name"] === "") return console.log("Role name cannot be empty");
                 const data = await client.rest.post(`/roles/${client.focusedGroup}`, {

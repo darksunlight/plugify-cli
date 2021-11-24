@@ -40,6 +40,10 @@ export class CommandHandler {
     }
 
     public async execute(command: string, line: string[]): Promise<void> {
-        await this.commands.get(command)?.execute({ line, client: this.client });
+        try {
+            await this.commands.get(command)?.execute({ line, client: this.client });
+        } catch (e) {
+            console.error(e);
+        }
     }
 }

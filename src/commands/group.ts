@@ -211,11 +211,12 @@ export class GroupCommand implements Command {
             case "edit": {
                 if (!client.focusedGroup) return console.log(`Please focus on a group by using \`${client.commandPrefix}focus\` or joining a channel`);
                 if (!line[2]) return console.log("Please specify what to edit.");
-                const args = Object.fromEntries(line.slice(2).join(" ").split(";").map(x => x.split(":")).filter(x => ["name", "owner", "password"].includes(x[0])));
+                const args = Object.fromEntries(line.slice(2).join(" ").split(";").map(x => x.split(":")).filter(x => ["name", "owner", "defaultPermissions", "password"].includes(x[0])));
                 if ("name" in args && args["name"] === "") return console.log("Channel name cannot be empty");
                 const data = await client.rest.patch(`/groups/${client.focusedGroup}`, {
                     "name": "name" in args ? args["name"] : undefined,
                     "owner": "owner" in args ? args["owner"] : undefined,
+                    "defaultPermissions": "defaultPermissions" in args ? parseInt(args["defaultPermissions"]) : undefined,
                     "password": "password" in args ? args["password"] : undefined
                 });
                 if (data.success) {
