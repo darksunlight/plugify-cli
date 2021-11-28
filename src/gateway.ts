@@ -25,6 +25,7 @@ export class GatewayHandler {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         this.ws.onmessage = async (event: any) => {
             const data = JSON.parse(event.data);
+            if (data.event !== 9001) console.log("[DEBUG] WS >>", data.event);
             switch (data.event) {
                 case GatewayEvent.WELCOME: {
                     this.send<{ token: string; allRooms?: boolean; }>(GatewayEvent.AUTHENTICATE, {

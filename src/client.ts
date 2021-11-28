@@ -37,6 +37,7 @@ export class Client {
     }
 
     async login(token: string): Promise<void> {
+        console.log("Loading...");
         this.token = token;
         return await this.gateway.init();
     }
