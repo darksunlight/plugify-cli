@@ -19,6 +19,7 @@ export interface Command {
         expectArg?: string;
         description?: string;
         allRooms?: AllRoomsSupport;
+        usage?: string;
     };
     // eslint-disable-next-line no-unused-vars
     execute(arg: CommandExecuteArguments): void | Promise<void>;
@@ -62,6 +63,21 @@ export enum GatewayEvent {
     CHANNEL_CREATE = 30,
     CHANNEL_DISCONNECT = 31,
     CHANNEL_UPDATE = 32,
+
+	ROLE_CREATE = 33,
+	ROLE_UPDATE = 34,
+
+	MESSAGE_UPDATE = 35,
+	MESSAGE_DELETE = 36,
+
+	CHANNEL_HISTORY_REQUEST = 37,
+	CHANNEL_HISTORY_SUCCESS = 38,
+	CHANNEL_HISTORY_ERROR = 39,
+
+	MEMBER_LIST_REQUEST = 40,
+	MEMBER_LIST_SUCCESS = 41,
+	MEMBER_LIST_ERROR = 42,
+	MEMBER_LIST_UPDATE = 43,
 
     PING = 9001
 }
@@ -161,7 +177,7 @@ export interface Channel {
     name: string;
     description: string;
     type: string;
-    groupId: string;
+    groupID: string;
     creaedAt: string;
     updatedAt: string;
 }

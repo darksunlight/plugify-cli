@@ -1,6 +1,8 @@
 import Websocket, { WebSocket } from "ws";
 import { Client } from "@/client";
 import { Channel, GatewayEvent, Group, Message } from "@/types";
+import { getLogger } from "log4js";
+const logger = getLogger("gateway");
 
 export class GatewayHandler {
     public ws: WebSocket;
@@ -25,7 +27,7 @@ export class GatewayHandler {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         this.ws.onmessage = async (event: any) => {
             const data = JSON.parse(event.data);
-            if (data.event !== 9001) console.log("[DEBUG] WS >>", data.event);
+            if (data.event !== 9001) logger.debug(">>", data.event);
             switch (data.event) {
                 case GatewayEvent.WELCOME: {
                     this.send<{ token: string; allRooms?: boolean; }>(GatewayEvent.AUTHENTICATE, {
@@ -54,16 +56,17 @@ export class GatewayHandler {
                 // eslint-disable-next-line no-fallthrough
                 case GatewayEvent.CHANNEL_JOIN_SUCCESS: {
                     const channel = data.data.channel as Channel;
-                    const group = this.client.groups.get(channel.groupId);
+                    const group = this.client.groups.get(channel.groupID);
                     if (!group) this.send(GatewayEvent.GROUP_GET_REQUEST, null);
-                    this.client.focusedGroup = channel.groupId;
+                    this.client.focusedGroup = channel.groupID;
                     this.client.channels.set(channel.id, channel);
                     this.client.joinedChannel = channel.id;
                     this.client.prompt.setPrompt(`${this.client.user.displayName ?? this.client.user.username}, #${channel.name}> `);
                     if (data.data.history) data.data.history.forEach((message: Message) => this.handleMessage(message));
-                    if (this.client.groups.get(channel.groupId)) {
-                        console.log(`Successfully joined #${channel.name} (${channel.id}) in ${this.client.groups.get(channel.groupId)!.name}`);
+                    if (this.client.groups.get(channel.groupID)) {
+                        console.log(`Successfully joined #${channel.name} (${channel.id}) in ${this.client.groups.get(channel.groupID)!.name}`);
                     } else {
+                        logger.debug(`Unknown group ID ${channel.groupID}`);
                         console.log(`Successfully joined #${channel.name} (${channel.id})`);
                     }
                     break;
@@ -94,7 +97,7 @@ export class GatewayHandler {
                     const channels = data.data as Channel[];
                     channels.forEach(channel => {
                         this.client.channels.set(channel.id, channel);
-                        const group = this.client.groups.get(channel.groupId);
+                        const group = this.client.groups.get(channel.groupID);
                         if (group) {
                             if (!group!.channels) group!.channels = new Map();
                             group!.channels!.set(channel.id, channel);
@@ -117,7 +120,7 @@ export class GatewayHandler {
                 case GatewayEvent.GROUP_REMOVED: {
                     console.log("Group removed:", data.data);
                     this.client.groups.delete(data.data.id);
-                    if (this.client.channels.get(this.client.joinedChannel)?.groupId === data.data.id) {
+                    if (this.client.channels.get(this.client.joinedChannel)?.groupID === data.data.id) {
                         this.client.joinedChannel = "";
                         this.client.prompt.setPrompt(`${this.client.user.displayName ?? this.client.user.username}, #none> `);
                     }
@@ -151,8 +154,13 @@ export class GatewayHandler {
                     break;
                 }
 
+                case GatewayEvent.MEMBER_LIST_SUCCESS: {
+                    console.log(data.data);
+                    break;
+                }
+
                 default: {
-                    console.log("[DEBUG] WS >>", data);
+                    logger.debug(">>", data);
                     break;
                 }
             }
@@ -181,6 +189,7 @@ export class GatewayHandler {
         }
         output += `${timeString} [${author.displayName} (@${author.username})]: ${content}\x1b[0m`;
         console.log(output);
+        logger.debug("ID:", data.id);
     }
     
 }

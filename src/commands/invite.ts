@@ -4,15 +4,12 @@ export class InviteCommand implements Command {
     public data = {
         name: "invite",
         aliases: [],
-        expectArg: "help info create use accept delete edit",
-        description: "Use, create and get info about invites"
+        expectArg: "info create use accept delete edit",
+        description: "Use, create and get info about invites",
+        usage: "help\n====\nDisplays help for this command.\n\ninfo [invite id]\n====\nGets info about a particular invite.\n\ncreate [group id] [uses (integer)] [expires (unix timestamp)]\n====\nCreates an invite for the specified group. Enter any non-positive number for unlimited uses. Enter 0 for no expiry.\n\nuse [invite id]\n====\nUses the given invite code."
     }
     public async execute({ line, client }: CommandExecuteArguments): Promise<void> {
         switch (line[1]) {
-            case "help": {
-                console.log("Subcommands: help, info, create, use, delete, edit\n\nhelp\n====\nDisplays help for this command.\n\ninfo [invite id]\n====\nGets info about a particular invite.\n\ncreate [group id] [uses (integer)] [expires (unix timestamp)]\n====\nCreates an invite for the specified group. Enter any non-positive number for unlimited uses. Enter 0 for no expiry.\n\nuse [invite id]\n====\nUses the given invite code.");
-                break;
-            }
             case "info": {
                 if (!line[2]) return console.log("Please specify an invite ID.");
                 const apiData = await client.rest.get(`/invites/${line[2]}`);
@@ -106,7 +103,7 @@ export class InviteCommand implements Command {
                 break;
             }
             default: {
-                console.log(client.prompt.expectArg("help info create use accept"));
+                console.log(client.prompt.expectArg(this.data.expectArg));
                 break;
             }
         }

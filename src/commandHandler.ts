@@ -9,6 +9,7 @@ import { EditCommand } from "@commands/edit";
 import { EvalCommand } from "@commands/eval";
 import { ExitCommand } from "@commands/exit";
 import { FocusCommand } from "@commands/focus";
+import { GatewayCommand } from "@/commands/gateway";
 import { GroupCommand } from "@commands/group";
 import { GroupsCommand } from "@commands/groups";
 import { HelpCommand } from "@commands/help";
@@ -25,7 +26,7 @@ export class CommandHandler {
         this.gateway = client.gateway;
         this.commands = new Map();
         this.commandsWithoutAliases = new Map();
-        [ChannelCommand, ChannelsCommand, DeleteCommand, EditCommand, EvalCommand, ExitCommand, FocusCommand, GroupCommand, GroupsCommand, HelpCommand, InviteCommand, JoinCommand, RestCommand, RoleCommand].forEach(commandClass => {
+        [ChannelCommand, ChannelsCommand, DeleteCommand, EditCommand, EvalCommand, ExitCommand, FocusCommand, GatewayCommand, GroupCommand, GroupsCommand, HelpCommand, InviteCommand, JoinCommand, RestCommand, RoleCommand].forEach(commandClass => {
             const command = new commandClass();
             this.commands.set(command.data.name, command);
             this.commandsWithoutAliases.set(command.data.name, command);

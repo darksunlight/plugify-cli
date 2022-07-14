@@ -7,8 +7,9 @@ export class RestCommand implements Command {
         description: "For developers: make requests through the raw REST API"
     }
     public async execute({ line, client }: CommandExecuteArguments): Promise<void> {
+        const methods = ["GET", "POST", "PATCH", "DELETE"];
         if (!line[1]) return console.log("Please supply a HTTP method");
-        if (!["get", "post", "patch", "delete"].includes(line[1].toLowerCase())) return console.log("Please supply a supported HTTP method. Currently supported methods: GET, POST.");
+        if (!methods.includes(line[1].toUpperCase())) return console.log(`Please supply a supported HTTP method. Currently supported methods: ${methods.join(", ")}.`);
         if (!line[2]) return console.log("Please supply a valid path");
         switch (line[1].toLowerCase()) {
             case "get": {

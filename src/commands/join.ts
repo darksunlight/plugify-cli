@@ -25,12 +25,12 @@ export class JoinCommand implements Command {
     private allRoomsJoin(client: Client, id: string): void {
         const channel = client.channels.get(id);
         if (!channel) return console.log("This channel doesn't exist or isn't cached yet.");
-        let group = client.groups.get(channel.groupId);
+        let group = client.groups.get(channel.groupID);
         if (!group) client.gateway.send(GatewayEvent.GROUP_GET_REQUEST, null);
-        client.focusedGroup = channel.groupId;
+        client.focusedGroup = channel.groupID;
         client.joinedChannel = channel.id;
         client.prompt.setPrompt(`${client.user.displayName ?? client.user.username}, #${channel.name}> `);
-        group = client.groups.get(channel.groupId);
+        group = client.groups.get(channel.groupID);
         console.log(`You are now focusing on #${channel.name} (${channel.id})${group ? ` in ${group.name}` : ""}`);
     }
     constructor() {}

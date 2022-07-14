@@ -4,7 +4,8 @@ export class DeleteCommand implements Command {
     public data = {
         name: "delete",
         aliases: [],
-        description: "Delete a message"
+        description: "Delete a message",
+        usage: "Example: .delete 7e3eddbc-eb47-44b4-a9f3-08a10b262280"
     }
     public async execute({ line, client }: CommandExecuteArguments): Promise<void> {
         if (client.allRooms && !line[2]) return console.log("Please supply a channel ID.");

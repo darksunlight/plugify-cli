@@ -4,7 +4,8 @@ export class EditCommand implements Command {
     public data = {
         name: "edit",
         aliases: [],
-        description: "Edit a message"
+        description: "Edit a message",
+        usage: "Example: .edit 7e3eddbc-eb47-44b4-a9f3-08a10b262280"
     }
     public async execute({ line, client }: CommandExecuteArguments): Promise<void> {
         if (!client.joinedChannel) return console.log("Please join a channel first.");

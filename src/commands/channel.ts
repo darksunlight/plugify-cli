@@ -17,7 +17,7 @@ export class ChannelCommand implements Command {
                 else return console.log("Please join a channel first or supply a valid channel ID");
                 if (!client.channels.get(channel) && ![...client.channels.values()].filter(x => x.name === channel).length) return console.log(`The specified channel cannot be found. Try running \`${client.commandPrefix}groups fetch\`.`);
                 if (client.channels.get(channel)) {
-                    const data = await client.rest.get(`/channels/${client.channels.get(channel)!.groupId}/${channel}`);
+                    const data = await client.rest.get(`/channels/${client.channels.get(channel)!.groupID}/${channel}`);
                     if (data.success) {
                         return console.log(data.data);
                     }
@@ -25,7 +25,7 @@ export class ChannelCommand implements Command {
                     if (data.data) console.log(data.data);
                 } else {
                     const mappedChannel = [...client.channels.values()].filter(x => x.name === channel)[0];
-                    const data = await client.rest.get(`/channels/${mappedChannel.groupId}/${mappedChannel.id}`);
+                    const data = await client.rest.get(`/channels/${mappedChannel.groupID}/${mappedChannel.id}`);
                     if (data.success) {
                         return console.log(data.data);
                     }
@@ -118,7 +118,7 @@ export class ChannelCommand implements Command {
                 if (!client.channels.get(client.joinedChannel)) console.error("Error: Channel not in cache. Restart plugify-cli.");
                 switch (line[2]) {
                     case "list": {
-                        const data = await client.rest.get(`/channels/${client.channels.get(client.joinedChannel)!.groupId}/${client.joinedChannel}/roles`);
+                        const data = await client.rest.get(`/channels/${client.channels.get(client.joinedChannel)!.groupID}/${client.joinedChannel}/roles`);
                         if (data.success) {
                             return console.log(data.data);
                         }
@@ -130,7 +130,7 @@ export class ChannelCommand implements Command {
                         if (!line[3]) return console.log("Please specify the role, and optionally the permissions you would like to allow and/or deny.");
                         const args = Object.fromEntries(line.slice(3).join(" ").split(";").map(x => x.split(":")).filter(x => ["role", "allow", "deny"].includes(x[0])));
                         if (!args.role) return console.log("Please specify the role");
-                        const data = await client.rest.post(`/channels/${client.channels.get(client.joinedChannel)!.groupId}/${client.joinedChannel}/roles/${args["role"]}`, {
+                        const data = await client.rest.post(`/channels/${client.channels.get(client.joinedChannel)!.groupID}/${client.joinedChannel}/roles/${args["role"]}`, {
                             "allow": "allow" in args ? parseInt(args["allow"]) : undefined,
                             "deny": "deny" in args ? parseInt(args["deny"]) : undefined
                         });
@@ -153,7 +153,7 @@ export class ChannelCommand implements Command {
                         if (!line[3]) return console.log("Please specify the role, and optionally the permissions you would like to allow and/or deny.");
                         const args = Object.fromEntries(line.slice(3).join(" ").split(";").map(x => x.split(":")).filter(x => ["role", "allow", "deny"].includes(x[0])));
                         if (!args.role) return console.log("Please specify the role");
-                        const data = await client.rest.patch(`/channels/${client.channels.get(client.joinedChannel)!.groupId}/${client.joinedChannel}/roles/${args["role"]}`, {
+                        const data = await client.rest.patch(`/channels/${client.channels.get(client.joinedChannel)!.groupID}/${client.joinedChannel}/roles/${args["role"]}`, {
                             "allow": "allow" in args ? parseInt(args["allow"]) : undefined,
                             "deny": "deny" in args ? parseInt(args["deny"]) : undefined
                         });
@@ -174,7 +174,7 @@ export class ChannelCommand implements Command {
                     }
                     case "delete": {
                         if (!line[3]) return console.log("Please specify a role ID for which the channel override you want to delete.");
-                        const data = await client.rest.delete(`/channels/${client.channels.get(client.joinedChannel)!.groupId}/${client.joinedChannel}/roles/${line[3]}`);
+                        const data = await client.rest.delete(`/channels/${client.channels.get(client.joinedChannel)!.groupID}/${client.joinedChannel}/roles/${line[3]}`);
                         if (data.success) {
                             return console.log("Success");
                         }

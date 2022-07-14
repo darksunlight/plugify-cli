@@ -20,6 +20,7 @@ export class HelpCommand implements Command {
         if (command.data.expectArg) {
             output.push(`Subcommands: ${command.data.expectArg.split(" ").join(", ")}`);
         }
+        output.push(command.data.usage);
         return console.log(output.join("\n"));
     }
     constructor() {}
